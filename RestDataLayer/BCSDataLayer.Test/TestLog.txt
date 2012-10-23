@@ -1,0 +1,35 @@
+2012-08-13 16:27:40,192 [TestRunnerThread] ERROR Bechtel.DataLayer.BCSDataLayer - Could not find file 'C:\DataLayer\BCSDataLayer\BCSDataLayer.Test\App_Data\Configuration.LinuxBox.BCS.xml'.
+2012-08-13 16:27:40,384 [TestRunnerThread] INFO  Bechtel.DataLayer.BCSDataLayer - Error while retrieving the data:   OracleConnection.ConnectionString is invalid
+2012-08-13 16:27:40,419 [TestRunnerThread] ERROR Bechtel.DataLayer.BCSDataLayer - Error get data table: System.InvalidOperationException: OracleConnection.ConnectionString is invalid
+   at Bechtel.DataLayer.BCSDataLayer.GetDataTable(String tableName, String whereClause, Int64 start, Int64 limit) in C:\DataLayer\BCSDataLayer\BCSDataLayer\BCSDataLayer.cs:line 392
+   at Bechtel.DataLayer.BCSDataLayer.Get(String objectType, DataFilter filter, Int32 limit, Int32 start) in C:\DataLayer\BCSDataLayer\BCSDataLayer\BCSDataLayer.cs:line 190
+2012-08-14 19:08:39,502 [TestRunnerThread] INFO  Bechtel.DataLayer.BCSDataLayer - Error while retrieving the data:   Object reference not set to an instance of an object.
+2012-08-14 19:08:39,548 [TestRunnerThread] ERROR Bechtel.DataLayer.BCSDataLayer - Error in GetList: System.NullReferenceException: Object reference not set to an instance of an object.
+   at Bechtel.DataLayer.BCSDataLayer.GetDataTable(String tableName, IList`1 identifiers) in C:\DataLayer\BCSDataLayer\BCSDataLayer\BCSDataLayer.cs:line 155
+   at Bechtel.DataLayer.BCSDataLayer.Get(String objectType, IList`1 identifiers) in C:\DataLayer\BCSDataLayer\BCSDataLayer\BCSDataLayer.cs:line 170
+2012-08-16 13:18:48,278 [TestRunnerThread] INFO  Bechtel.DataLayer.BCSDataLayer - Error while retrieving the data:   Object reference not set to an instance of an object.
+2012-08-16 13:18:48,337 [TestRunnerThread] ERROR Bechtel.DataLayer.BCSDataLayer - Error in GetList: System.NullReferenceException: Object reference not set to an instance of an object.
+   at Bechtel.DataLayer.BCSDataLayer.GetDataTable(String tableName, IList`1 identifiers) in C:\DataLayer\BCSDataLayer\BCSDataLayer\BCSDataLayer.cs:line 155
+   at Bechtel.DataLayer.BCSDataLayer.Get(String objectType, IList`1 identifiers) in C:\DataLayer\BCSDataLayer\BCSDataLayer\BCSDataLayer.cs:line 170
+2012-08-16 16:40:45,881 [TestRunnerThread] INFO  Bechtel.DataLayer.BCSDataLayer - Error while retrieving the data:   ORA-00911: invalid character
+2012-08-16 16:46:51,036 [TestRunnerThread] INFO  Bechtel.DataLayer.BCSDataLayer - Error while retrieving the data:   Object reference not set to an instance of an object.
+2012-08-16 16:46:51,053 [TestRunnerThread] ERROR Bechtel.DataLayer.BCSDataLayer - Error in GetList: System.NullReferenceException: Object reference not set to an instance of an object.
+   at Bechtel.DataLayer.BCSDataLayer.GetDataTable(String tableName, IList`1 identifiers) in C:\DataLayer\BCSDataLayer\BCSDataLayer\BCSDataLayer.cs:line 156
+   at Bechtel.DataLayer.BCSDataLayer.Get(String objectType, IList`1 identifiers) in C:\DataLayer\BCSDataLayer\BCSDataLayer\BCSDataLayer.cs:line 171
+2012-08-16 17:31:54,492 [TestRunnerThread] INFO  Bechtel.DataLayer.BCSDataLayer - Error while retrieving the data:   Object reference not set to an instance of an object.
+2012-08-16 17:31:54,529 [TestRunnerThread] ERROR Bechtel.DataLayer.BCSDataLayer - Error in GetList: System.NullReferenceException: Object reference not set to an instance of an object.
+   at Bechtel.DataLayer.BCSDataLayer.GetDataTable(String tableName, IList`1 identifiers) in C:\DataLayer\BCSDataLayer\BCSDataLayer\BCSDataLayer.cs:line 156
+   at Bechtel.DataLayer.BCSDataLayer.Get(String objectType, IList`1 identifiers) in C:\DataLayer\BCSDataLayer\BCSDataLayer\BCSDataLayer.cs:line 171
+2012-08-16 17:36:45,683 [TestRunnerThread] INFO  Bechtel.DataLayer.BCSDataLayer - Error while retrieving the data:   Object reference not set to an instance of an object.
+2012-08-16 17:37:24,186 [TestRunnerThread] INFO  Bechtel.DataLayer.BCSDataLayer - Error while retrieving the data:   Object reference not set to an instance of an object.
+2012-08-16 17:37:24,200 [TestRunnerThread] ERROR Bechtel.DataLayer.BCSDataLayer - Error in GetList: System.NullReferenceException: Object reference not set to an instance of an object.
+   at Bechtel.DataLayer.BCSDataLayer.GetDataTable(String tableName, IList`1 identifiers) in C:\DataLayer\BCSDataLayer\BCSDataLayer\BCSDataLayer.cs:line 156
+   at Bechtel.DataLayer.BCSDataLayer.Get(String objectType, IList`1 identifiers) in C:\DataLayer\BCSDataLayer\BCSDataLayer\BCSDataLayer.cs:line 171
+2012-08-21 19:37:33,826 [TestRunnerThread] INFO  Bechtel.DataLayer.BCSDataLayer - Error while retrieving the data:   There is no Original data to access.
+2012-08-22 14:20:05,816 [TestRunnerThread] INFO  Bechtel.DataLayer.BCSDataLayer - Error while retrieving the data:   Index (zero based) must be greater than or equal to zero and less than the size of the argument list.
+2012-08-22 16:12:30,806 [TestRunnerThread] INFO  Bechtel.DataLayer.BCSDataLayer - Error while opening the connection with database:   Object reference not set to an instance of an object.
+2012-08-22 16:27:05,379 [TestRunnerThread] INFO  Bechtel.DataLayer.BCSDataLayer - Error while retrieving the data:   ORA-00923: FROM keyword not found where expected
+2012-08-22 16:27:05,422 [TestRunnerThread] ERROR Bechtel.DataLayer.BCSDataLayer - Error get data table: Oracle.DataAccess.Client.OracleException ORA-00923: FROM keyword not found where expected    at Bechtel.DataLayer.BCSDataLayer.GetDataTable(String tableName, String whereClause, Int64 start, Int64 limit) in C:\DataLayer\BCSDataLayer\BCSDataLayer\BCSDataLayer.cs:line 502
+   at Bechtel.DataLayer.BCSDataLayer.Get(String objectType, DataFilter filter, Int32 limit, Int32 start) in C:\DataLayer\BCSDataLayer\BCSDataLayer\BCSDataLayer.cs:line 184
+2012-08-22 16:49:31,151 [TestRunnerThread] INFO  Bechtel.DataLayer.BCSDataLayer - Error while retrieving the data:   ORA-00933: SQL command not properly ended
+2012-08-23 15:01:07,456 [TestRunnerThread] INFO  Bechtel.DataLayer.BCSDataLayer - Error while retrieving the data:   ORA-00933: SQL command not properly ended

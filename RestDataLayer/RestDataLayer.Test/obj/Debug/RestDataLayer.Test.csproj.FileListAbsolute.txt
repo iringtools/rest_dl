@@ -1,0 +1,17 @@
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer.Test\obj\Debug\ResolveAssemblyReference.cache
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer.Test\bin\Debug\RestDataLayer.Test.dll
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer.Test\bin\Debug\RestDataLayer.Test.pdb
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer.Test\bin\Debug\iRINGLibrary.dll
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer.Test\bin\Debug\log4net.dll
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer.Test\bin\Debug\nunit.framework.dll
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer.Test\bin\Debug\StaticDust.Configuration.dll
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer.Test\bin\Debug\UtilityLibrary.dll
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer.Test\bin\Debug\nunit.framework.xml
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer.Test\obj\Debug\RestDataLayer.Test.dll
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer.Test\obj\Debug\RestDataLayer.Test.pdb
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer.Test\bin\Debug\RestDataLayer.Test.dll.config
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer.Test\bin\Debug\RestDataLayer.dll
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer.Test\bin\Debug\RestDataLayer.pdb
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer.Test\bin\Debug\Newtonsoft.Json.dll
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer.Test\bin\Debug\Newtonsoft.Json.pdb
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer.Test\bin\Debug\Newtonsoft.Json.xml

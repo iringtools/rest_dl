@@ -1,0 +1,12 @@
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer\bin\Debug\RestDataLayer.dll
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer\bin\Debug\RestDataLayer.pdb
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer\obj\Debug\ResolveAssemblyReference.cache
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer\obj\Debug\RestDataLayer.dll
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer\obj\Debug\RestDataLayer.pdb
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer\bin\Debug\iRINGLibrary.dll
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer\bin\Debug\log4net.dll
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer\bin\Debug\StaticDust.Configuration.dll
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer\bin\Debug\UtilityLibrary.dll
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer\bin\Debug\Newtonsoft.Json.dll
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer\bin\Debug\Newtonsoft.Json.pdb
+c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLayer\bin\Debug\Newtonsoft.Json.xml
