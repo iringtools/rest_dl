@@ -61,11 +61,15 @@
     <Compile Include="Test.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="App_Data\Configuration.1234.Restful.xml" />
+    <Content Include="App_Data\Configuration.1234.Restful.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Scenarios.xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RestDataLayer\RestDataLayer.csproj">

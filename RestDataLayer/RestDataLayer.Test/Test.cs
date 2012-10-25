@@ -15,6 +15,7 @@ using StaticDust.Configuration;
 
 
 
+
 namespace RestDataLayer.Test
 {
    [TestFixture]
@@ -52,7 +53,7 @@ namespace RestDataLayer.Test
 
 
        [Test]
-       public void Dictionary_Create_Test()
+       public void Test_Dictionary_Creation()
        {
            Response response = null;
            int MAX_ITEMS = 25;
@@ -68,80 +69,105 @@ namespace RestDataLayer.Test
           
        }
 
-       private string GetIdentifier(IDataObject dataObject)
+       [Test]
+       public void Test_GetDataTable()
        {
-           string[] identifierParts = new string[_objectDefinition.keyProperties.Count];
+         DataDictionary dictionary = _dataLayer.GetDictionary();
+         IList<string> identifiers = new List<string>();
+         identifiers.Add("1");
 
-           int i = 0;
-           foreach (KeyProperty keyProperty in _objectDefinition.keyProperties)
-           {
-               identifierParts[i] = dataObject.GetPropertyValue(keyProperty.keyPropertyName).ToString();
-               i++;
-           }
+         IList<IDataObject> dataObject = _dataLayer.Get("Function", identifiers);
+         
+           Assert.AreEqual(dataObject.Count, 1);
 
-           return String.Join(_objectDefinition.keyDelimeter, identifierParts);
+
        }
 
-       private void SetIdentifier(IDataObject dataObject, string identifier)
-       {
-           IList<string> keyProperties = GetKeyProperties();
 
-           if (keyProperties.Count == 1)
-           {
-               dataObject.SetPropertyValue(keyProperties[0], identifier);
-           }
-           else if (keyProperties.Count > 1)
-           {
-               StringBuilder identifierBuilder = new StringBuilder();
 
-               foreach (string keyProperty in keyProperties)
-               {
-                   dataObject.SetPropertyValue(keyProperty, identifier);
+       //[Test]
+       //public void TestGetWithIdentifiers()
+       //{
+       //    IList<string> identifiers = _dataLayer.GetIdentifiers(_objectType, new DataFilter());
+       //    IList<string> identifier = ((List<string>)identifiers).GetRange(1, 1);
+       //    IList<IDataObject> dataObjects = _dataLayer.Get(_objectType, identifier);
+       //    Assert.Greater(dataObjects.Count, 0);
+       //}
 
-                   if (identifierBuilder.Length > 0)
-                   {
-                       identifierBuilder.Append(_objectDefinition.keyDelimeter);
-                   }
+       //private string GetIdentifier(IDataObject dataObject)
+       //{
+       //    string[] identifierParts = new string[_objectDefinition.keyProperties.Count];
 
-                   identifierBuilder.Append(identifier);
-               }
+       //    int i = 0;
+       //    foreach (KeyProperty keyProperty in _objectDefinition.keyProperties)
+       //    {
+       //        identifierParts[i] = dataObject.GetPropertyValue(keyProperty.keyPropertyName).ToString();
+       //        i++;
+       //    }
 
-               identifier = identifierBuilder.ToString();
-           }
-       }
+       //    return String.Join(_objectDefinition.keyDelimeter, identifierParts);
+       //}
 
-       private IList<string> GetKeyProperties()
-       {
-           IList<string> keyProperties = new List<string>();
+       //private void SetIdentifier(IDataObject dataObject, string identifier)
+       //{
+       //    IList<string> keyProperties = GetKeyProperties();
 
-           foreach (DataProperty dataProp in _objectDefinition.dataProperties)
-           {
-               foreach (KeyProperty keyProp in _objectDefinition.keyProperties)
-               {
-                   if (dataProp.propertyName == keyProp.keyPropertyName)
-                   {
-                       keyProperties.Add(dataProp.propertyName);
-                   }
-               }
-           }
-           return keyProperties;
-       }
+       //    if (keyProperties.Count == 1)
+       //    {
+       //        dataObject.SetPropertyValue(keyProperties[0], identifier);
+       //    }
+       //    else if (keyProperties.Count > 1)
+       //    {
+       //        StringBuilder identifierBuilder = new StringBuilder();
 
-       private DataObject GetObjectDefinition(string objectType)
-       {
-           DataDictionary dictionary = _dataLayer.GetDictionary();
+       //        foreach (string keyProperty in keyProperties)
+       //        {
+       //            dataObject.SetPropertyValue(keyProperty, identifier);
 
-           if (dictionary.dataObjects != null)
-           {
-               foreach (DataObject dataObject in dictionary.dataObjects)
-               {
-                   if (dataObject.objectName.ToLower() == objectType.ToLower())
-                   {
-                       return dataObject;
-                   }
-               }
-           }
-           return null;
-       }
+       //            if (identifierBuilder.Length > 0)
+       //            {
+       //                identifierBuilder.Append(_objectDefinition.keyDelimeter);
+       //            }
+
+       //            identifierBuilder.Append(identifier);
+       //        }
+
+       //        identifier = identifierBuilder.ToString();
+       //    }
+       //}
+
+       //private IList<string> GetKeyProperties()
+       //{
+       //    IList<string> keyProperties = new List<string>();
+
+       //    foreach (DataProperty dataProp in _objectDefinition.dataProperties)
+       //    {
+       //        foreach (KeyProperty keyProp in _objectDefinition.keyProperties)
+       //        {
+       //            if (dataProp.propertyName == keyProp.keyPropertyName)
+       //            {
+       //                keyProperties.Add(dataProp.propertyName);
+       //            }
+       //        }
+       //    }
+       //    return keyProperties;
+       //}
+
+       //private DataObject GetObjectDefinition(string objectType)
+       //{
+       //    DataDictionary dictionary = _dataLayer.GetDictionary();
+
+       //    if (dictionary.dataObjects != null)
+       //    {
+       //        foreach (DataObject dataObject in dictionary.dataObjects)
+       //        {
+       //            if (dataObject.objectName.ToLower() == objectType.ToLower())
+       //            {
+       //                return dataObject;
+       //            }
+       //        }
+       //    }
+       //    return null;
+       //}
    }
 }

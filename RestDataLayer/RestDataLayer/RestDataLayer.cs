@@ -11,6 +11,7 @@ using System.Xml.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Data;
+using log4net;
 
 namespace Bechtel.DataLayer
 {
@@ -22,6 +23,7 @@ namespace Bechtel.DataLayer
         private string _xmlPath = string.Empty;
         private string _baseDirectory = string.Empty;
         private DatabaseDictionary _dictionary = null;
+        private ILog _logger = LogManager.GetLogger(typeof(RestDataLayer));
 
         private Dictionary<string, string> _configDictionary = null;
 
@@ -34,12 +36,19 @@ namespace Bechtel.DataLayer
             _projectName = _settings["projectName"];
             _applicationName = _settings["applicationName"];
             _baseDirectory = _settings["BaseDirectoryPath"];
-            _configDictionary = LoadConfigrationDetails();
+            _configDictionary = LoadConfigrationDetailsInDictionary();
         }
 
-        private Dictionary<string, string> LoadConfigrationDetails()
+        
+
+        #region Private function
+
+        /// <summary>
+        /// It will Load configration detail in a Dictionary object.
+        /// </summary>
+        private Dictionary<string, string> LoadConfigrationDetailsInDictionary()
         {
-             Dictionary<string, string> dict = null;
+            Dictionary<string, string> dict = null;
 
             try
             {
@@ -47,58 +56,20 @@ namespace Bechtel.DataLayer
                 XDocument doc = XDocument.Load(_baseDirectory + _xmlPath + configPath);
 
                 dict = doc.Descendants("add").ToDictionary(x => x.Attribute("key").Value, x => x.Attribute("value").Value);
-             
+
             }
             catch (Exception ex)
             {
-              // _logger.Error(ex.Message);
+                 _logger.Error(ex.Message);
             }
             return dict;
 
         }
 
-        public override DataDictionary GetDictionary()
-        {
-           
-
-            string Connectionstring = string.Empty;
-
-            string path = String.Format("{0}{1}DataDictionary.{2}.{3}.xml", _baseDirectory, _xmlPath, _projectName, _applicationName);
-            try
-            {
-                if ((File.Exists(path)))
-                {
-                    dynamic DataDictionary = Utility.Read<DataDictionary>(path);
-                    _dataDictionary = Utility.Read<DataDictionary>(path);
-                    return _dataDictionary;
-                }
-                else
-                {
-                  
-
-                   // Connectionstring = GetConnectionString();
-                    _dataDictionary = LoadDataObjects();
-                    
-                    DatabaseDictionary _databaseDictionary = new DatabaseDictionary();
-                    _databaseDictionary.dataObjects = _dataDictionary.dataObjects;
-                    _databaseDictionary.ConnectionString = EncryptionUtility.Encrypt(Connectionstring);
-                    _databaseDictionary.Provider = "Oracle11g";
-                    _databaseDictionary.SchemaName = "dbo";
-
-                    Utility.Write<DatabaseDictionary>(_databaseDictionary, String.Format("{0}{1}DataBaseDictionary.{2}.{3}.xml", _baseDirectory, _xmlPath, _projectName, _applicationName));
-                    Utility.Write<DataDictionary>(_dataDictionary, String.Format("{0}{1}DataDictionary.{2}.{3}.xml", _baseDirectory, _xmlPath, _projectName, _applicationName));
-                    return _dataDictionary;
-                }
-            }
-            catch(Exception  ex)
-            {
-                string error = "Error in getting dictionary";
-              //  _logger.Error(error);
-                throw new Exception(error);
-            }
-        }
-
-        private void FillDataProperties(string jsonString, List<DataProp> dataPrpCollection,string objectName)
+        /// <summary>
+        /// It will Parse json string and then fill a list with their properties
+        /// </summary>
+        private void FillDataPropertiesFrom(string jsonString, List<DataProp> dataPrpCollection,string objectName)
         {
 
             List<DataProp> dataPrpCollectionTemp = new List<DataProp>();
@@ -116,7 +87,6 @@ namespace Bechtel.DataLayer
                 dp.columnName = jp.Name;
                 dp.propertyName= jp.Name;
                 dp.keyType = "unassigned";
-                dp.dataLength = "1000";
                 dp.isNullable = "false";
 
                 if (dp.columnName.ToUpper() == "ID" && isKeyAssigned == false)
@@ -130,16 +100,37 @@ namespace Bechtel.DataLayer
                 {
                     case JTokenType.Integer:
                         dp.dataType = DataType.Int32;
+                        dp.dataLength = "22";
                         break;
                     case JTokenType.Date:
                         dp.dataType = DataType.DateTime;
+                        dp.dataLength = "0";
                         break;
                     case JTokenType.String:
                         dp.dataType = DataType.String;
+                        dp.dataLength = "1000";
+                        break;
+                    case JTokenType.Float:
+                        dp.dataType = DataType.Double;
+                        dp.dataLength = "50";
+                        break;
+                    case JTokenType.Boolean:
+                        dp.dataType = DataType.Boolean;
+                        dp.dataLength = "1";
+                        break;
+                    case JTokenType.Bytes:
+                        dp.dataType = DataType.Byte;
+                        dp.dataLength = "8";
+                        break;
+                    case JTokenType.Uri:
+                        dp.dataType = DataType.Reference;
+                        dp.dataLength = "1000";
                         break;
                     default:
                         dp.dataType = DataType.String;
+                        dp.dataLength = "1000";
                         break;
+
                 }
 
                 dataPrpCollectionTemp.Add(dp);
@@ -192,15 +183,15 @@ namespace Bechtel.DataLayer
                 List<DataProp> dataPrpCollection = new List<DataProp>();
 
                 var objectList = (from obj in _configDictionary
-                                  where obj.Key.StartsWith("Object_") == true
+                                  where obj.Key.StartsWith(Constants.OBJECT_PREFIX) == true
                                   select obj).ToList();
 
                 foreach (var dic in objectList)
                 {
                     string objectName = dic.Key.Split('_')[1];
                     string url = dic.Value;
-                    string jsonString = GetJsonResponse(url);
-                    FillDataProperties(jsonString, dataPrpCollection, objectName);
+                    string jsonString = GetJsonResponseFrom(url);
+                    FillDataPropertiesFrom(jsonString, dataPrpCollection, objectName);
                 }
 
                 foreach (DataProp dp in dataPrpCollection)
@@ -213,7 +204,7 @@ namespace Bechtel.DataLayer
                         Object_Name = dp.Object_Name;
                         _dataObject.objectName = Object_Name;
                         _dataObject.tableName = Object_Name;
-                        _dataObject.keyDelimeter = "_";
+                        _dataObject.keyDelimeter =Constants.DELIMITER_CHAR;
                     }
 
                     _dataproperties = new DataProperty();
@@ -260,82 +251,187 @@ namespace Bechtel.DataLayer
             }
         }
 
-        private string GetXmlResponse(string url)
+        /// <summary>
+        /// It returns url for restfull service of specified object
+        /// </summary>
+        /// <param name="objectName">object name/table name</param>
+        /// <returns></returns>
+        private string GetObjectUrl(string objectName)
         {
-            // string url = "https://api-staging.mypsn.com/svc2/v1/watchdog/users/pksingh/permissions";
+            var url = (from dicEntry in _configDictionary
+                              where dicEntry.Key.ToUpper() == (Constants.OBJECT_PREFIX + objectName).ToUpper()
+                              select dicEntry.Value).SingleOrDefault<string>();
 
+            return url;
 
-            WebRequest request = WebRequest.Create(url);
-
-           
-
-
-            //request.Headers.Add("Authorization", "NbFk6TjUNUtejPnCWPwOvFSgh6ng");
-            //request.Headers.Add("X-myPSN-AppKey", "3627c519d78e24772ed8375d4e878e2d");
-
-            string authToken = _configDictionary["AuthToken"];
-            string appKey = _configDictionary["AppKey"];
-
-            //request.Headers.Add(HttpRequestHeader.Accept, "application/json") ;
-            request.Headers[HttpRequestHeader.Accept] = "application/json";
-
-            
-            //request.Headers.Add("Accept", "application/json");
-            request.Headers.Add("Authorization", authToken);
-            request.Headers.Add("X-myPSN-AppKey", appKey);
-            
-            
-
-
-
-
-            WebRequest.DefaultWebProxy.Credentials = CredentialCache.DefaultCredentials;
-            request.Credentials = CredentialCache.DefaultCredentials;
-            string responseFromServer = string.Empty;
-            using (WebResponse response = request.GetResponse())
-            {
-                using (Stream responseStream = response.GetResponseStream())
-                {
-                    using (StreamReader reader = new StreamReader(responseStream))
-                    {
-                        responseFromServer = reader.ReadToEnd();
-                    }
-                }
-
-            }
-
-            return responseFromServer;
         }
 
-        private string GetJsonResponse(string url)
+
+        /// <summary>
+        /// it returns Parse jsonString into DataTable object
+        /// </summary>
+        /// <param name="jsonString">Json string</param>
+        /// <returns></returns>
+        private DataTable GetDataTableFrom(string jsonString)
         {
+            DataTable dt = new DataTable();
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            
-            string authToken = _configDictionary["AuthToken"];
-            string appKey = _configDictionary["AppKey"];
-            
-            request.Accept =  "application/json" ;
-            request.Headers.Add("Authorization", authToken);
-            request.Headers.Add("X-myPSN-AppKey", appKey);
+            JObject o = JObject.Parse(jsonString);
 
-            WebRequest.DefaultWebProxy.Credentials = CredentialCache.DefaultCredentials;
-            request.Credentials = CredentialCache.DefaultCredentials;
-
-            string responseFromServer = string.Empty;
-            using (WebResponse response = request.GetResponse())
+            JArray items = (JArray)o["Items"];
+  
+            //Create Columns for dataTable
+            JObject item = (JObject)items[0];
+            foreach (var jp in item.Properties())
             {
-                using (Stream responseStream = response.GetResponseStream())
-                {
-                    using (StreamReader reader = new StreamReader(responseStream))
-                    {
-                        responseFromServer = reader.ReadToEnd();
-                    }
-                }
-
+                dt.Columns.Add(new DataColumn(jp.Name));
             }
 
-            return responseFromServer;
+            foreach(JObject jo in (JArray)o["Items"])
+            {
+                DataRow dr = dt.NewRow();
+                foreach (var jp in jo.Properties())
+                {
+                    dr[jp.Name] = jp.Value; 
+                }
+
+                dt.Rows.Add(dr);
+            }
+
+            return dt;
+        }
+
+        /// <summary>
+        /// It will make a request on URL and retuen json string.
+        /// </summary>
+        private string GetJsonResponseFrom(string url)
+        {
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+
+                string authToken = _configDictionary["AuthToken"];
+                string appKey = _configDictionary["AppKey"];
+
+                request.Accept = "application/json";
+                request.Headers.Add("Authorization", authToken);
+                request.Headers.Add("X-myPSN-AppKey", appKey);
+
+                WebRequest.DefaultWebProxy.Credentials = CredentialCache.DefaultCredentials;
+                request.Credentials = CredentialCache.DefaultCredentials;
+
+                string responseFromServer = string.Empty;
+                using (WebResponse response = request.GetResponse())
+                {
+                    using (Stream responseStream = response.GetResponseStream())
+                    {
+                        using (StreamReader reader = new StreamReader(responseStream))
+                        {
+                            responseFromServer = reader.ReadToEnd();
+                        }
+                    }
+
+                }
+
+                return responseFromServer;
+            }
+            catch
+            {
+                throw new ApplicationException("Error in connectiong rest server");
+            }
+        }
+         
+        #endregion
+
+        /// <summary>
+        /// It will give you the DataDictionary if present in the App_Data Folder else It will create it.
+        /// </summary>
+        public override DataDictionary GetDictionary()
+        {
+
+            string Connectionstring = string.Empty;
+
+            string path = String.Format("{0}{1}DataDictionary.{2}.{3}.xml", _baseDirectory, _xmlPath, _projectName, _applicationName);
+            try
+            {
+                if ((File.Exists(path)))
+                {
+                    dynamic DataDictionary = Utility.Read<DataDictionary>(path);
+                    _dataDictionary = Utility.Read<DataDictionary>(path);
+                    return _dataDictionary;
+                }
+                else
+                {
+
+                    _dataDictionary = LoadDataObjects();
+
+                    DatabaseDictionary _databaseDictionary = new DatabaseDictionary();
+                    _databaseDictionary.dataObjects = _dataDictionary.dataObjects;
+                    _databaseDictionary.ConnectionString = EncryptionUtility.Encrypt(Connectionstring);
+                    _databaseDictionary.Provider = "Oracle11g";
+                    _databaseDictionary.SchemaName = "dbo";
+
+                    Utility.Write<DatabaseDictionary>(_databaseDictionary, String.Format("{0}{1}DataBaseDictionary.{2}.{3}.xml", _baseDirectory, _xmlPath, _projectName, _applicationName));
+                    Utility.Write<DataDictionary>(_dataDictionary, String.Format("{0}{1}DataDictionary.{2}.{3}.xml", _baseDirectory, _xmlPath, _projectName, _applicationName));
+                    return _dataDictionary;
+                }
+            }
+            catch
+            {
+                string error = "Error in getting dictionary";
+                //  _logger.Error(error);
+                throw new ApplicationException(error);
+            }
+        }
+
+        /// <summary>
+        /// It will convert the datatable into list of IDataObject which is the desired form for Iring.
+        /// </summary>
+        /// <param name="objectType">name of the object</param>
+        /// <param name="identifiers">list of identifiers based on this datatable will be produced</param>
+        public override IList<IDataObject> Get(string objectType, IList<string> identifiers)
+        {
+            try
+            {
+                DataTable datatable = GetDataTable(objectType, identifiers);
+                IList<IDataObject> dataObjects = ToDataObjects(datatable, objectType);
+
+                return dataObjects;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Error in GetList: " + ex);
+                throw new Exception("Error while getting a list of data objects of type [" + objectType + "].", ex);
+            }
+        }
+
+        /// <summary>
+        /// Returns the list of IDataObject which is expected for Iring.
+        /// </summary>
+        /// <param name="objectType">name of the object</param>
+        /// <param name="filter">filter to get the desired rows</param>
+        /// <param name="limit">no. of rows to be choosen</param>
+        /// <param name="start">starting point of the rows from the table</param>
+        public override IList<IDataObject> Get(string objectType, DataFilter filter, int limit, int start)
+        {
+            _dataFilter = filter;
+            try
+            {
+                string tableName = GetTableName(objectType);
+                string whereClause = string.Empty;
+
+                if (filter != null)
+                    whereClause = filter.ToSqlWhereClause(_dbDictionary, tableName, _whereClauseAlias);
+
+                DataTable dataTable = GetDataTable(tableName, whereClause, start, limit);
+                IList<IDataObject> dataObjects = ToDataObjects(dataTable, objectType);
+                return dataObjects;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Error get data table: " + ex);
+                throw ex;
+            }
         }
 
         public override System.Data.DataTable CreateDataTable(string tableName, IList<string> identifiers)
@@ -360,17 +456,63 @@ namespace Bechtel.DataLayer
 
         public override System.Data.DataTable GetDataTable(string tableName, string whereClause, long start, long limit)
         {
-            throw new NotImplementedException();
+            try
+            {
+                string url = GetObjectUrl(tableName);
+
+                url = url + @"?start="+ Convert.ToString(start) +@"&limit=" + Convert.ToString(limit);
+
+                string jsonString = GetJsonResponseFrom(url);
+                DataTable datatable = GetDataTableFrom(jsonString);
+                return datatable;
+            }
+            catch (Exception ex)
+            {
+                string error = String.Format("Error getting DataTable from table {0}: {1}", tableName, ex);
+                _logger.Error(error);
+                throw new Exception(error);
+            }         
         }
 
         public override System.Data.DataTable GetDataTable(string tableName, IList<string> identifiers)
         {
-            throw new NotImplementedException();
+            try
+            {
+                string url = GetObjectUrl(tableName);
+
+                if (identifiers != null)
+                {
+                    foreach (string id in identifiers)
+                    {
+                        //url = url +@"/Search?q=" + id;
+                        url = url + @"/" + id;
+                        break;
+                    }
+                }
+
+                /*
+                DatabaseDictionary _dbDictionary = GetDatabaseDictionary();
+                DataObject objDef = _dbDictionary.dataObjects.Find(p => p.tableName == tableName);
+                IList<string> keyCols = GetKeyColumns(objDef);
+                */
+
+                string jsonString = GetJsonResponseFrom(url);
+                DataTable datatable = GetDataTableFrom(jsonString);
+                return datatable;
+            }
+            catch(Exception ex)
+            {
+                string error = String.Format("Error data rows from table {0} with identifiers {1}: {2}", tableName, identifiers.ToString(), ex);
+                _logger.Error(error);
+                throw new Exception(error);
+            }            
+
         }
 
         public override DatabaseDictionary GetDatabaseDictionary()
         {
-            throw new NotImplementedException();
+            _dictionary = Utility.Read<DatabaseDictionary>(String.Format("{0}{1}DataBaseDictionary.{2}.{3}.xml", _baseDirectory, _xmlPath, _projectName, _applicationName));
+            return _dictionary;
         }
 
         public override IList<string> GetIdentifiers(string tableName, string whereClause)
