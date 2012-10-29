@@ -32,3 +32,20 @@ c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLay
 \\NDHD203655\Users\bkumar2\Documents\Visual Studio 2010\Projects\RestDataLayer\RestDataLayer.Test\obj\Debug\ResolveAssemblyReference.cache
 \\NDHD203655\Users\bkumar2\Documents\Visual Studio 2010\Projects\RestDataLayer\RestDataLayer.Test\obj\Debug\RestDataLayer.Test.dll
 \\NDHD203655\Users\bkumar2\Documents\Visual Studio 2010\Projects\RestDataLayer\RestDataLayer.Test\obj\Debug\RestDataLayer.Test.pdb
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer.Test\bin\Debug\RestDataLayer.Test.dll.config
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer.Test\bin\Debug\RestDataLayer.Test.dll
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer.Test\bin\Debug\RestDataLayer.Test.pdb
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer.Test\bin\Debug\iRINGLibrary.dll
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer.Test\bin\Debug\log4net.dll
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer.Test\bin\Debug\nunit.framework.dll
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer.Test\bin\Debug\RestDataLayer.dll
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer.Test\bin\Debug\StaticDust.Configuration.dll
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer.Test\bin\Debug\UtilityLibrary.dll
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer.Test\bin\Debug\Newtonsoft.Json.dll
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer.Test\bin\Debug\RestDataLayer.pdb
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer.Test\bin\Debug\nunit.framework.xml
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer.Test\bin\Debug\Newtonsoft.Json.pdb
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer.Test\bin\Debug\Newtonsoft.Json.xml
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer.Test\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer.Test\obj\Debug\RestDataLayer.Test.dll
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer.Test\obj\Debug\RestDataLayer.Test.pdb

@@ -22,3 +22,15 @@ c:\users\bkumar2\documents\visual studio 2010\Projects\RestDataLayer\RestDataLay
 \\NDHD203655\Users\bkumar2\Documents\Visual Studio 2010\Projects\RestDataLayer\RestDataLayer\obj\Debug\ResolveAssemblyReference.cache
 \\NDHD203655\Users\bkumar2\Documents\Visual Studio 2010\Projects\RestDataLayer\RestDataLayer\obj\Debug\RestDataLayer.dll
 \\NDHD203655\Users\bkumar2\Documents\Visual Studio 2010\Projects\RestDataLayer\RestDataLayer\obj\Debug\RestDataLayer.pdb
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer\bin\Debug\RestDataLayer.dll
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer\bin\Debug\RestDataLayer.pdb
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer\bin\Debug\iRINGLibrary.dll
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer\bin\Debug\log4net.dll
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer\bin\Debug\Newtonsoft.Json.dll
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer\bin\Debug\StaticDust.Configuration.dll
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer\bin\Debug\UtilityLibrary.dll
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer\bin\Debug\Newtonsoft.Json.pdb
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer\bin\Debug\Newtonsoft.Json.xml
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer\obj\Debug\RestDataLayer.dll
+C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer\obj\Debug\RestDataLayer.pdb

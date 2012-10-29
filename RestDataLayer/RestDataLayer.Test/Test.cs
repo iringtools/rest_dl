@@ -76,13 +76,34 @@ namespace RestDataLayer.Test
          IList<string> identifiers = new List<string>();
          identifiers.Add("1");
 
-         IList<IDataObject> dataObject = _dataLayer.Get("Function", identifiers);
+         IList<IDataObject> dataObject = _dataLayer.Get("Project", identifiers);
          
            Assert.AreEqual(dataObject.Count, 1);
 
 
        }
 
+       [Test]
+       public void Test_Get_Data_With_Paging()
+       {
+         DataDictionary  dictionary = _dataLayer.GetDictionary();
+        IList<string> identifiers = new List<string>();
+         identifiers.Add("1");
+
+         IList<IDataObject> dataObject = _dataLayer.Get("Project", null, 10, 2);
+         Assert.AreEqual(dataObject.Count, 10);
+
+ 
+       }
+
+       [Test]
+       public void Test_Get_Identifiers()
+       {
+
+           IList<string> identifiers = _dataLayer.GetIdentifiers("Project", null);
+           Assert.Greater(identifiers.Count, 0);
+
+       }
 
 
        //[Test]
