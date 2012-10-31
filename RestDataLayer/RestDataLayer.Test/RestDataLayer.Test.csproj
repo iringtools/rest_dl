@@ -61,10 +61,12 @@
     <Compile Include="Test.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="App_Data\Configuration.1234.Restful.xml">
+    <Content Include="App_Data\Configuration.5678.Restful.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Scenarios.xml" />
+    <Content Include="Scenarios.xml">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">

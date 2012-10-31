@@ -13,6 +13,7 @@ using Newtonsoft.Json.Linq;
 using System.Data;
 using log4net;
 
+
 namespace Bechtel.DataLayer
 {
     public class RestDataLayer : BaseSQLDataLayer
@@ -26,7 +27,6 @@ namespace Bechtel.DataLayer
         private ILog _logger = LogManager.GetLogger(typeof(RestDataLayer));
 
         private Dictionary<string, string> _configDictionary = null;
-
 
         public RestDataLayer(AdapterSettings settings)
             : base(settings)
@@ -66,8 +66,8 @@ namespace Bechtel.DataLayer
                     DatabaseDictionary _databaseDictionary = new DatabaseDictionary();
                     _databaseDictionary.dataObjects = _dataDictionary.dataObjects;
                     _databaseDictionary.ConnectionString = EncryptionUtility.Encrypt(Connectionstring);
-                    _databaseDictionary.Provider = "Oracle11g";
-                    _databaseDictionary.SchemaName = "dbo";
+                    _databaseDictionary.Provider = "dummy";
+                    _databaseDictionary.SchemaName = "dummy";
 
                     Utility.Write<DatabaseDictionary>(_databaseDictionary, String.Format("{0}{1}DataBaseDictionary.{2}.{3}.xml", _baseDirectory, _xmlPath, _projectName, _applicationName));
                     Utility.Write<DataDictionary>(_dataDictionary, String.Format("{0}{1}DataDictionary.{2}.{3}.xml", _baseDirectory, _xmlPath, _projectName, _applicationName));
@@ -91,23 +91,10 @@ namespace Bechtel.DataLayer
         {
             try
             {
-                string url = GetObjectUrl(objectType);
-
-                if (identifiers != null)
-                {
-                    foreach (string id in identifiers)
-                    {
-                        url = url + @"/" + id;
-                        break;
-                    }
-                }
-
+                string url = GenerateUrl(objectType, identifiers);
                 string jsonString = GetJsonResponseFrom(url);
-
-                DataTable datatable = GetDataTableFrom(jsonString);
-
+                DataTable datatable = GetDataTableFrom(jsonString, objectType);
                 IList<IDataObject> dataObjects = ToDataObjects(datatable, objectType);
-
                 return dataObjects;
             }
             catch (Exception ex)
@@ -126,23 +113,59 @@ namespace Bechtel.DataLayer
         /// <param name="start">starting point of the rows from the table</param>
         public override IList<IDataObject> Get(string objectType, DataFilter filter, int limit, int start)
         {
-            long lStart = start;
-            long lLimit = limit;
+            int lStart = start;
+            int lLimit = limit;
+
 
             _dataFilter = filter;
             try
             {
-                string url = GetObjectUrl(objectType);
 
-                if (lLimit == 0)
-                { lLimit = 10000000; }
-
-                url = url + @"?start=" + Convert.ToString(lStart) + @"&limit=" + Convert.ToString(lLimit);
-
+                string url = GenerateUrl(objectType, filter, limit, start);
                 string jsonString = GetJsonResponseFrom(url);
-                DataTable dataTable = GetDataTableFrom(jsonString);
-                
+                DataTable dataTable = GetDataTableFrom(jsonString, objectType);
                 IList<IDataObject> dataObjects = ToDataObjects(dataTable, objectType);
+
+                //filtering 
+                if (filter != null && filter.Expressions != null && filter.Expressions.Count > 0)
+                {
+                    DataObject objDef = _dataDictionary.dataObjects.Find(p => p.objectName.ToUpper() == objectType.ToUpper());
+                    var predicate = filter.ToPredicate(objDef);
+                    dataObjects = (dataObjects.Where(predicate.Compile())).ToList<IDataObject>();
+                }
+
+                var orderLinq = dataObjects;
+                
+                //Sorting 
+                if (filter != null && filter.OrderExpressions != null && filter.OrderExpressions.Count > 0)
+                {
+                    //foreach (OrderExpression orderExpression in filter.OrderExpressions)
+                    //{
+                    //    switch (orderExpression.SortOrder)
+                    //    {
+                    //        case SortOrder.Asc:
+                    //            orderLinq.
+                    //        case SortOrder.Desc:
+                    //            break;
+                    //        default:
+                    //            throw new Exception("Sort order is not specified.");
+                    //    }
+                    //    //string orderStatement = DataFilterExtensionMethods.ResolveOrderExpression(orderExpression);
+                    //    //orderClause.Append(orderStatement);
+                    //}
+                }
+
+
+
+
+                if (lStart >= dataObjects.Count)
+                    lStart = dataObjects.Count;
+
+                if (lLimit == 0 || (lLimit + lStart) >= dataObjects.Count)
+                    lLimit = dataObjects.Count - lStart;
+
+                dataObjects = ((List<IDataObject>)dataObjects).GetRange(lStart, lLimit);
+
                 return dataObjects;
             }
             catch (Exception ex)
@@ -165,7 +188,7 @@ namespace Bechtel.DataLayer
             {
                 identifiers  = new List<string>();
 
-                DataObject objDef = _dbDictionary.dataObjects.Find(p => p.objectName.ToUpper() == objectType.ToUpper());
+                DataObject objDef = _dataDictionary.dataObjects.Find(p => p.objectName.ToUpper() == objectType.ToUpper());
                 IList<string> keyCols = GetKeyColumns(objDef);
 
                 //NOTE: pageSize of 0 indicates that all rows should be returned.
@@ -184,6 +207,26 @@ namespace Bechtel.DataLayer
             return identifiers;
         }
 
+        public override long GetCount(string objectType, DataFilter filter)
+        {
+            try
+            {
+                try
+                {
+                    return GetObjectCount(objectType, filter);
+                }
+                catch
+                {
+                    IList<IDataObject> dataObjects = Get(objectType, filter, 0, 0);
+                    return dataObjects.Count();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Error in GetCount: " + ex);
+                throw new Exception("Error while getting a count of type [" + objectType + "].", ex );
+            }
+        }
 
         #region Not implemented Methods
 
@@ -482,12 +525,83 @@ namespace Bechtel.DataLayer
             }
         }
 
-        private  DataTable GetDataTableFrom(string jsonString)
+        private DataTable GetDataTableFrom(string jsonString, string objectType, string collectionName = "Items")
         {
-            JObject o = JObject.Parse(jsonString);
-            JArray items = (JArray)o["Items"];
-            DataTable dt = items.ToObject<DataTable>();
-            return dt;
+            if (jsonString.IndexOf("{\"status_text\":\"Record Not Found.\",\"status_code\":\"202\"}")>=0)
+            {
+               return GetDataTableSchema(objectType);
+            }
+            else
+            {
+                JObject o = JObject.Parse(jsonString);
+                JArray items = (JArray)o[collectionName];
+                DataTable dt = items.ToObject<DataTable>();
+                dt.TableName = objectType;
+                return dt;
+            }
+        }
+
+        private DataTable GetDataTableSchema(string objectType)
+        {
+            DataObject objDef = _dataDictionary.dataObjects.Find(p => p.objectName.ToUpper() == objectType.ToUpper());
+            DataTable dataTable = new DataTable();
+            dataTable.TableName = objectType;
+            foreach (DataProperty property in objDef.dataProperties)
+            {
+                DataColumn dataColumn = new DataColumn();
+                dataColumn.ColumnName = property.columnName;
+                dataColumn.DataType = Type.GetType("System."+property.dataType.ToString());
+                dataTable.Columns.Add(dataColumn);
+            }
+
+
+            return dataTable;
+        }
+
+        private string GenerateUrl(string objectType, DataFilter filter, int limit, int start)
+        {
+            string url = GetObjectUrl(objectType);
+            //url = url + @"?start=" + Convert.ToString(lStart) + @"&limit=" + Convert.ToString(lLimit);
+            url = url + @"?start=" + Convert.ToString(0) + @"&limit=" + Convert.ToString(10000000);
+            return url;
+        }
+
+        private string GenerateUrl(string objectType, IList<string> identifiers)
+        {
+            string url = GetObjectUrl(objectType);
+
+            if (identifiers != null)
+            {
+                foreach (string id in identifiers)
+                {
+                    url = url + @"/" + id;
+                    break;
+                }
+            }
+
+            return url;
+        }
+
+        private long GetObjectCount(string objectType, DataFilter filter)
+        {
+            string url = GetObjectUrl(objectType);
+            url = url + @"?start=0&limit=1";
+            string jsonString = GetJsonResponseFrom(url);
+
+            if (jsonString.IndexOf("{\"status_text\":\"Record Not Found.\",\"status_code\":\"202\"}") >= 0)
+            {
+                return 0;
+            }
+            else
+            {
+                JObject o = JObject.Parse(jsonString);
+                long count = Convert.ToInt64(o["total"].ToString());
+
+                return count;
+            }
+
+
+
         }
 
         private  DataType ResolveDataType(JTokenType type)
@@ -532,10 +646,46 @@ namespace Bechtel.DataLayer
 
         }
 
+        private System.Type ResolveDataType(DataType dataType)
+        {
+
+
+            switch (dataType)
+            {
+                case DataType.Boolean:
+                    return typeof(bool);
+                case DataType.Byte:
+                    return typeof(bool);
+                case DataType.Char:
+                    return typeof(bool);
+                case DataType.DateTime:
+                    return typeof(bool);
+                case DataType.Decimal:
+                    return typeof(bool);
+                case DataType.Double:
+                    return typeof(bool);
+                case DataType.Int16:
+                    return typeof(bool);
+                case DataType.Int32:
+                    return typeof(bool);
+                case DataType.Int64:
+                    return typeof(bool);
+                case DataType.Reference:
+                    return typeof(bool);
+                case DataType.String:
+                    return typeof(bool);
+                case DataType.Single:
+                    return typeof(bool);
+                             
+
+            }
+            return typeof(string);
+        }
+
         #endregion
     }
 
-    public class DataProp
+    internal class DataProp
     {
         public string Object_Name;
         public string columnName;
@@ -546,4 +696,45 @@ namespace Bechtel.DataLayer
         public string keyType;
         public bool isKey;
     }
+
+    internal static class DataFilterExtensionMethods
+    {
+        public static string ToLinqOrderByCluase(this DataFilter dataFilter)
+        {
+            //StringBuilder orderClause = new StringBuilder();
+
+            //foreach (OrderExpression orderExpression in dataFilter.OrderExpressions)
+            //{
+            //    string propertyName = orderExpression.PropertyName;
+            //    string orderStatement = DataFilterExtensionMethods.ResolveOrderExpression(orderExpression);
+            //    orderClause.Append(orderStatement);
+            //}
+            return "";
+        }
+
+        private static string  ResolveOrderExpression(OrderExpression  orderExpression)
+        {
+            return null;
+            //StringBuilder sqlExpression = new StringBuilder();
+
+            //switch (orderExpression.SortOrder)
+            //{
+            //    case SortOrder.Asc:
+            //        sqlExpression.Append(orderExpression.PropertyName + " ASC");
+            //        break;
+
+            //    case SortOrder.Desc:
+            //        sqlExpression.Append(orderExpression.PropertyName + " DESC");
+            //        break;
+
+            //    default:
+            //        throw new Exception("Sort order is not specified.");
+            //}
+
+            //return sqlExpression.ToString();
+        }
+
+    }
+
+
 }

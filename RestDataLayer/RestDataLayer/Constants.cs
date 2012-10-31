@@ -9,6 +9,13 @@ namespace Bechtel.DataLayer
     {
         public const string DELIMITER_CHAR = "^";
         public const string OBJECT_PREFIX = "Object_";
-      
+
+        public static class ObjectName
+        {
+            public const string Projects = "Projects";
+            public const string Functions = "Functions";
+            public const string Loactions = "Loactions";
+        }
+
     }
 }

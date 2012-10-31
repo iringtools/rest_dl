@@ -55,9 +55,7 @@ namespace RestDataLayer.Test
        [Test]
        public void Test_Dictionary_Creation()
        {
-           Response response = null;
-           int MAX_ITEMS = 25;
-
+         
            #region Test dictionary
            Console.WriteLine("\nTesting get dictionary ...");
            _logger.Info("\nTesting get dictionary ...");
@@ -76,7 +74,7 @@ namespace RestDataLayer.Test
          IList<string> identifiers = new List<string>();
          identifiers.Add("1");
 
-         IList<IDataObject> dataObject = _dataLayer.Get("Project", identifiers);
+         IList<IDataObject> dataObject = _dataLayer.Get("Function", identifiers);
          
            Assert.AreEqual(dataObject.Count, 1);
 
@@ -84,36 +82,50 @@ namespace RestDataLayer.Test
        }
 
        [Test]
-       public void Test_Get_Data_With_Paging()
+       public void Test_GetCount()
        {
-         DataDictionary  dictionary = _dataLayer.GetDictionary();
-        IList<string> identifiers = new List<string>();
-         identifiers.Add("1");
+           DataDictionary dictionary = _dataLayer.GetDictionary();
 
-         IList<IDataObject> dataObject = _dataLayer.Get("Project", null, 10, 2);
-         Assert.AreEqual(dataObject.Count, 10);
+           long count = _dataLayer.GetCount("Function",null);
 
- 
-       }
+           Assert.Greater(count, 1);
 
-       [Test]
-       public void Test_Get_Identifiers()
-       {
-
-           IList<string> identifiers = _dataLayer.GetIdentifiers("Project", null);
-           Assert.Greater(identifiers.Count, 0);
 
        }
-
 
        //[Test]
-       //public void TestGetWithIdentifiers()
+       //public void Test_Get_Data_With_Paging()
        //{
-       //    IList<string> identifiers = _dataLayer.GetIdentifiers(_objectType, new DataFilter());
-       //    IList<string> identifier = ((List<string>)identifiers).GetRange(1, 1);
-       //    IList<IDataObject> dataObjects = _dataLayer.Get(_objectType, identifier);
-       //    Assert.Greater(dataObjects.Count, 0);
+       //  DataDictionary  dictionary = _dataLayer.GetDictionary();
+       // IList<string> identifiers = new List<string>();
+       //  identifiers.Add("1");
+
+       //  IList<IDataObject> dataObject = _dataLayer.Get("Function", null, 10, 2);
+       //  Assert.AreEqual(dataObject.Count, 10);
+
+ 
        //}
+
+       //[Test]
+       //public void Test_Get_Identifiers()
+       //{
+
+       //    IList<string> identifiers = _dataLayer.GetIdentifiers("Function", null);
+       //    Assert.Greater(identifiers.Count, 0);
+
+       //}
+
+
+
+
+       [Test]
+       public void TestGetWithIdentifiers()
+       {
+           IList<string> identifiers = _dataLayer.GetIdentifiers("Project", new DataFilter());
+           IList<string> identifier = ((List<string>)identifiers).GetRange(1, 1);
+           IList<IDataObject> dataObjects = _dataLayer.Get("Project", identifier);
+           Assert.Greater(dataObjects.Count, 0);
+       }
 
        //private string GetIdentifier(IDataObject dataObject)
        //{
