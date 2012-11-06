@@ -1,7 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<configuration>
-  <add key="AuthToken" value= "nL4FGzV0vh8rwyO4qAetFjnpOtwU" ></add>
-  <add key="AppKey" value= "3627c519d78e24772ed8375d4e878e2d" ></add>
-  <add key="Object_Project" value= "https://api-staging.mypsn.com/svc1/v2/businesshierarchy/Projects" ></add>
-  <add key="Object_Function" value= "https://api-staging.mypsn.com/svc1/v2/businesshierarchy/Functions" ></add>
-</configuration>

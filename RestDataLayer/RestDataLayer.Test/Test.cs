@@ -24,14 +24,17 @@ namespace RestDataLayer.Test
 
         private static readonly ILog _logger = LogManager.GetLogger(typeof(Tests));
         private IDataLayer2 _dataLayer;
-        private Scenarios _scenarios = null;
         private string _objectType;
         private string _modifiedProperty;
         private string _modifiedValue;
         private DataObject _objectDefinition;
+        private DataFilter _filter;
+        
 
        public Tests()
        {
+           _objectType = "Function";
+
            string baseDir = Directory.GetCurrentDirectory();
            Directory.SetCurrentDirectory(baseDir.Substring(0, baseDir.LastIndexOf("\\bin")));
 
@@ -41,11 +44,22 @@ namespace RestDataLayer.Test
            FileInfo log4netConfig = new FileInfo("Log4net.config");
            log4net.Config.XmlConfigurator.Configure(log4netConfig);
 
-           
+           string twConfigFile = String.Format("{0}{1}.{2}.config",
+             adapterSettings["AppDataPath"],
+             adapterSettings["ProjectName"],
+             adapterSettings["ApplicationName"]
+           );
+
+           AppSettingsReader twSettings = new AppSettingsReader(twConfigFile);
+           adapterSettings.AppendSettings(twSettings);
+
            _dataLayer = new Bechtel.DataLayer.RestDataLayer(adapterSettings);
 
+           _filter = Utility.Read<DataFilter>(adapterSettings["FilterPath"]);
+           
+
            //_scenarios = Utility.Read<Scenarios>("Scenarios.xml");
-           //_objectType = adapterSettings["ObjectType"];
+           _objectType = adapterSettings["ObjectType"];
            //_modifiedProperty = adapterSettings["ModifiedProperty"];
            //_modifiedValue = adapterSettings["ModifiedValue"];
            //_objectDefinition = GetObjectDefinition(_objectType);
@@ -74,7 +88,7 @@ namespace RestDataLayer.Test
          IList<string> identifiers = new List<string>();
          identifiers.Add("1");
 
-         IList<IDataObject> dataObject = _dataLayer.Get("Function", identifiers);
+         IList<IDataObject> dataObject = _dataLayer.Get(_objectType, identifiers);
          
            Assert.AreEqual(dataObject.Count, 1);
 
@@ -86,13 +100,28 @@ namespace RestDataLayer.Test
        {
            DataDictionary dictionary = _dataLayer.GetDictionary();
 
-           long count = _dataLayer.GetCount("Function",null);
+           long count = _dataLayer.GetCount(_objectType, null);
 
            Assert.Greater(count, 1);
 
 
        }
 
+       [Test]
+       public void Test_Get_With_Filter()
+       {
+         DataDictionary  dictionary = _dataLayer.GetDictionary();
+         IList<IDataObject> dataObject = _dataLayer.Get(_objectType, _filter, 10, 0);
+         Assert.AreEqual(dataObject.Count, 1);
+           
+       }
+
+       [Test]
+       public void TestCreate()
+       {
+           IList<IDataObject> dataObjects = _dataLayer.Create(_objectType, null);
+           Assert.AreNotEqual(dataObjects, null);
+       }
        //[Test]
        //public void Test_Get_Data_With_Paging()
        //{
@@ -121,9 +150,9 @@ namespace RestDataLayer.Test
        [Test]
        public void TestGetWithIdentifiers()
        {
-           IList<string> identifiers = _dataLayer.GetIdentifiers("Project", new DataFilter());
+           IList<string> identifiers = _dataLayer.GetIdentifiers("Function", new DataFilter());
            IList<string> identifier = ((List<string>)identifiers).GetRange(1, 1);
-           IList<IDataObject> dataObjects = _dataLayer.Get("Project", identifier);
+           IList<IDataObject> dataObjects = _dataLayer.Get("Function", identifier);
            Assert.Greater(dataObjects.Count, 0);
        }
 
