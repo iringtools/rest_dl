@@ -60,11 +60,12 @@ namespace RestDataLayer.Test
 
            //_scenarios = Utility.Read<Scenarios>("Scenarios.xml");
            _objectType = adapterSettings["ObjectType"];
-           //_modifiedProperty = adapterSettings["ModifiedProperty"];
-           //_modifiedValue = adapterSettings["ModifiedValue"];
+           _modifiedProperty = adapterSettings["ModifiedProperty"];
+           _modifiedValue = adapterSettings["ModifiedValue"];
            //_objectDefinition = GetObjectDefinition(_objectType);
        }
 
+    
 
        [Test]
        public void Test_Dictionary_Creation()
@@ -122,6 +123,21 @@ namespace RestDataLayer.Test
            IList<IDataObject> dataObjects = _dataLayer.Create(_objectType, null);
            Assert.AreNotEqual(dataObjects, null);
        }
+    
+       [Test]
+       public void TestPostWithUpdate()
+       {
+           DataDictionary dictionary = _dataLayer.GetDictionary();
+          // IList<IDataObject> dataObjects = _dataLayer.Get(_objectType, null, 1, 0);
+           IList<IDataObject> dataObjects = _dataLayer.Create(_objectType, null);
+
+           dataObjects[0].SetPropertyValue(_modifiedProperty, _modifiedValue);
+
+           Response response = _dataLayer.Post(dataObjects);
+           Assert.AreEqual(response.Level, StatusLevel.Success);
+       }
+        
+
        //[Test]
        //public void Test_Get_Data_With_Paging()
        //{

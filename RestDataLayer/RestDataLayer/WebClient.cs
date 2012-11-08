@@ -6,7 +6,7 @@ using System.Net.Http;
 
 namespace Bechtel.DataLayer
 {
-    internal class WebClient
+    internal class WebClient : IWebClient
     {
         private HttpClient client = null;
 
@@ -34,7 +34,18 @@ namespace Bechtel.DataLayer
             return response;
         }
 
+        public void MakePutRequest(string url,string objectString)
+        {
+           StringContent sc = new StringContent(objectString);
+           var rsponse = client.PutAsync(url, sc).Result.EnsureSuccessStatusCode();
+           
+        }
 
-
+        public void MakePostRequest(string url, string objectString)
+        {
+            StringContent sc = new StringContent(objectString);
+            var rsponse = client.PostAsync(url, sc).Result.EnsureSuccessStatusCode();
+            
+        }
     }
 }

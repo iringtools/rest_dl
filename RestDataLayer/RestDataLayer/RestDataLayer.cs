@@ -26,12 +26,16 @@ namespace Bechtel.DataLayer
         private string _projectName = string.Empty;
         private string _xmlPath = string.Empty;
         private string _baseDirectory = string.Empty;
+        private string _keyDelimiter;
 
         string _authToken = string.Empty;
         string _appKey = string.Empty;
         string _baseUrl = string.Empty;
-        WebClient _webClient = null;
+        
+        IWebClient _webClient = null;
+
         private ILog _logger = LogManager.GetLogger(typeof(RestDataLayer));
+
 
         private Dictionary<string, string> _objectyDictionary = null;
 
@@ -44,9 +48,12 @@ namespace Bechtel.DataLayer
             _authToken = _settings["AuthToken"];
             _appKey = _settings["AppKey"];
             _baseUrl = _settings["BaseUrl"];
-            
+            _keyDelimiter = Convert.ToString(_settings["DefaultKeyDelimiter"]) ?? string.Empty;
             _objectyDictionary = LoadEndPointInDictionary();
+
+            //_webClient = new IringWebClient(_baseUrl, _appKey, _authToken);
             _webClient = new WebClient(_baseUrl, _appKey, _authToken);
+            //_webClient = new MockWebClient(_baseUrl, _appKey, _authToken);
 
         }
 
@@ -211,7 +218,115 @@ namespace Bechtel.DataLayer
 
         public override Response Post(IList<IDataObject> dataObjects)
         {
-            throw new NotImplementedException();
+            Response response = new Response();
+            string objectType = String.Empty;
+            bool isNew = false;
+            string identifier = String.Empty; 
+             
+            objectType = ((GenericDataObject)dataObjects.FirstOrDefault()).ObjectType;
+            DataObject objDef = _dataDictionary.dataObjects.Find(p => p.objectName.ToUpper() == objectType.ToUpper());
+            
+
+
+            if (dataObjects == null || dataObjects.Count == 0)
+            {
+                Status status = new Status();
+                status.Level = StatusLevel.Warning;
+                status.Messages.Add("Data object list provided was empty.");
+                response.Append(status);
+                return response;
+            }
+
+            try
+            {
+
+                foreach (IDataObject dataObject in dataObjects)
+                {
+                    identifier = String.Empty;
+                    Status status = new Status();
+                    string message = String.Empty;
+
+                    try
+                    {
+                        String objectString = FormJsonObjectString(dataObject);
+                        foreach (KeyProperty dataProperty in objDef.keyProperties)
+                        {
+                            string value = Convert.ToString(dataObject.GetPropertyValue(dataProperty.keyPropertyName));
+                            if (String.IsNullOrEmpty(value))
+                                isNew = true;
+                            else
+                                identifier = value;
+
+                            break;
+                        }
+                        if (!String.IsNullOrEmpty(identifier))
+                        {
+                            int count = Get(objectType, new List<string>() { identifier }).Count;
+                            if (count > 0)
+                                isNew = false;
+                            else
+                                isNew = true;
+                        }
+
+                        string url = GenerateUrl(objectType);
+                        if (isNew) ///Post data
+                        {
+                            _webClient.MakePostRequest(url, objectString);
+                        }
+                        else ///put data
+                        {
+                            _webClient.MakePutRequest(url, objectString);
+                        }
+
+                        message = String.Format("Data object [{0}] posted successfully.", identifier);
+                        status.Messages.Add(message);
+                        response.Append(status);
+
+                    }
+                    catch (Exception ex)
+                    {
+                        message = String.Format("Error while posting data object [{0}].", identifier);
+                        status.Messages.Add(message);
+                        response.Append(status);
+                    }
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _logger.ErrorFormat("Error while processing a list of data objects of type [{0}]: {1}", objectType, ex);
+                throw new Exception("Error while processing a list of data objects of type [" + objectType + "].", ex);
+            }
+
+            return response;
+        }
+
+        private string FormJsonObjectString(IDataObject dataObject)
+        {
+            string objectType = ((GenericDataObject)dataObject).ObjectType;
+            DataObject objDef = _dataDictionary.dataObjects.Find(p => p.objectName.ToUpper() == objectType.ToUpper());
+
+            StringBuilder sb = new StringBuilder();
+            StringWriter sw = new StringWriter(sb);
+            if (objDef !=null)
+            {
+
+                
+                 JsonWriter jsonWriter = new JsonTextWriter(sw);
+                 jsonWriter.Formatting = Formatting.Indented;
+                 jsonWriter.WriteStartObject();
+
+                foreach(var entry in ((GenericDataObject)dataObject).Dictionary)
+                {
+                    jsonWriter.WritePropertyName(entry.Key);
+                    jsonWriter.WriteValue(entry.Value);
+                }
+                jsonWriter.WriteEndObject();
+                jsonWriter.Close();
+                sw.Close();
+            }
+            return sw.ToString();
         }
 
         public override Response Delete(string objectType, DataFilter filter)
@@ -347,7 +462,7 @@ namespace Bechtel.DataLayer
                         Object_Name = dp.Object_Name;
                         _dataObject.objectName = Object_Name;
                         _dataObject.tableName = Object_Name;
-                        _dataObject.keyDelimeter = Constants.DELIMITER_CHAR;
+                        _dataObject.keyDelimeter = _keyDelimiter;
                     }
 
                     _dataproperties = new DataProperty();
@@ -490,6 +605,12 @@ namespace Bechtel.DataLayer
 
             return url;
         }
+
+        private string GenerateUrl(string objectType)
+        {
+            return GetObjectUrl(objectType);
+        }
+        
 
         private long GetObjectCount(string objectType, DataFilter filter)
         {
