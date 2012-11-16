@@ -10,12 +10,8 @@ namespace Bechtel.DataLayer
         string MakeGetRequest(string url);
         void MakePutRequest(string url, string objectString);
         void MakePostRequest(string url, string objectString);
-<<<<<<< HEAD
-//void MakePostRequest(string url, string objectString);
-
-=======
         void MakeDeleteRequest(string url);
->>>>>>> Add, update and delete operations added
+
     }
 
     internal class IringWebClient : IWebClient
