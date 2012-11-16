@@ -62,7 +62,7 @@ namespace RestDataLayer.Test
            _objectType = adapterSettings["ObjectType"];
            _modifiedProperty = adapterSettings["ModifiedProperty"];
            _modifiedValue = adapterSettings["ModifiedValue"];
-           //_objectDefinition = GetObjectDefinition(_objectType);
+           _objectDefinition = GetObjectDefinition(_objectType);
        }
 
     
@@ -136,7 +136,31 @@ namespace RestDataLayer.Test
            Response response = _dataLayer.Post(dataObjects);
            Assert.AreEqual(response.Level, StatusLevel.Success);
        }
-        
+
+
+       
+       [Test]
+       public void TestPostWithAddAndDeleteByIdentifier()
+       {
+           //
+           // create a new data object by getting an existing one and change its identifier
+           //
+           IList<IDataObject> dataObjects = _dataLayer.Get(_objectType, new DataFilter(), 1, 1);
+           string identifier =  GetIdentifier(dataObjects[0]);
+
+           string newIdentifier = GenerateStringValue();
+           SetIdentifier(dataObjects[0], newIdentifier);
+
+           // post the new data object
+           Response response = _dataLayer.Post(dataObjects);
+           Assert.AreEqual(response.Level, StatusLevel.Success);
+
+           //
+           // delete the new data object by its identifier
+           //
+           response = _dataLayer.Delete(_objectType, new List<string> { newIdentifier });
+           Assert.AreEqual(response.Level, StatusLevel.Success);
+       }
 
        //[Test]
        //public void Test_Get_Data_With_Paging()
@@ -172,80 +196,88 @@ namespace RestDataLayer.Test
            Assert.Greater(dataObjects.Count, 0);
        }
 
-       //private string GetIdentifier(IDataObject dataObject)
-       //{
-       //    string[] identifierParts = new string[_objectDefinition.keyProperties.Count];
+       #region helper methods
+       private string GenerateStringValue()
+       {
+           return DateTime.Now.ToUniversalTime().Ticks.ToString();
+       }
 
-       //    int i = 0;
-       //    foreach (KeyProperty keyProperty in _objectDefinition.keyProperties)
-       //    {
-       //        identifierParts[i] = dataObject.GetPropertyValue(keyProperty.keyPropertyName).ToString();
-       //        i++;
-       //    }
+       private string GetIdentifier(IDataObject dataObject)
+       {
+           string[] identifierParts = new string[_objectDefinition.keyProperties.Count];
 
-       //    return String.Join(_objectDefinition.keyDelimeter, identifierParts);
-       //}
+           int i = 0;
+           foreach (KeyProperty keyProperty in _objectDefinition.keyProperties)
+           {
+               identifierParts[i] = dataObject.GetPropertyValue(keyProperty.keyPropertyName).ToString();
+               i++;
+           }
 
-       //private void SetIdentifier(IDataObject dataObject, string identifier)
-       //{
-       //    IList<string> keyProperties = GetKeyProperties();
+           return String.Join(_objectDefinition.keyDelimeter, identifierParts);
+       }
 
-       //    if (keyProperties.Count == 1)
-       //    {
-       //        dataObject.SetPropertyValue(keyProperties[0], identifier);
-       //    }
-       //    else if (keyProperties.Count > 1)
-       //    {
-       //        StringBuilder identifierBuilder = new StringBuilder();
+       private void SetIdentifier(IDataObject dataObject, string identifier)
+       {
+           IList<string> keyProperties = GetKeyProperties();
 
-       //        foreach (string keyProperty in keyProperties)
-       //        {
-       //            dataObject.SetPropertyValue(keyProperty, identifier);
+           if (keyProperties.Count == 1)
+           {
+               dataObject.SetPropertyValue(keyProperties[0], identifier);
+           }
+           else if (keyProperties.Count > 1)
+           {
+               StringBuilder identifierBuilder = new StringBuilder();
 
-       //            if (identifierBuilder.Length > 0)
-       //            {
-       //                identifierBuilder.Append(_objectDefinition.keyDelimeter);
-       //            }
+               foreach (string keyProperty in keyProperties)
+               {
+                   dataObject.SetPropertyValue(keyProperty, identifier);
 
-       //            identifierBuilder.Append(identifier);
-       //        }
+                   if (identifierBuilder.Length > 0)
+                   {
+                       identifierBuilder.Append(_objectDefinition.keyDelimeter);
+                   }
 
-       //        identifier = identifierBuilder.ToString();
-       //    }
-       //}
+                   identifierBuilder.Append(identifier);
+               }
 
-       //private IList<string> GetKeyProperties()
-       //{
-       //    IList<string> keyProperties = new List<string>();
+               identifier = identifierBuilder.ToString();
+           }
+       }
 
-       //    foreach (DataProperty dataProp in _objectDefinition.dataProperties)
-       //    {
-       //        foreach (KeyProperty keyProp in _objectDefinition.keyProperties)
-       //        {
-       //            if (dataProp.propertyName == keyProp.keyPropertyName)
-       //            {
-       //                keyProperties.Add(dataProp.propertyName);
-       //            }
-       //        }
-       //    }
-       //    return keyProperties;
-       //}
+       private IList<string> GetKeyProperties()
+       {
+           IList<string> keyProperties = new List<string>();
 
-       //private DataObject GetObjectDefinition(string objectType)
-       //{
-       //    DataDictionary dictionary = _dataLayer.GetDictionary();
+           foreach (DataProperty dataProp in _objectDefinition.dataProperties)
+           {
+               foreach (KeyProperty keyProp in _objectDefinition.keyProperties)
+               {
+                   if (dataProp.propertyName == keyProp.keyPropertyName)
+                   {
+                       keyProperties.Add(dataProp.propertyName);
+                   }
+               }
+           }
+           return keyProperties;
+       }
 
-       //    if (dictionary.dataObjects != null)
-       //    {
-       //        foreach (DataObject dataObject in dictionary.dataObjects)
-       //        {
-       //            if (dataObject.objectName.ToLower() == objectType.ToLower())
-       //            {
-       //                return dataObject;
-       //            }
-       //        }
-       //    }
-       //    return null;
-       //}
-   }
+       private DataObject GetObjectDefinition(string objectType)
+       {
+           DataDictionary dictionary = _dataLayer.GetDictionary();
+
+           if (dictionary.dataObjects != null)
+           {
+               foreach (DataObject dataObject in dictionary.dataObjects)
+               {
+                   if (dataObject.objectName.ToLower() == objectType.ToLower())
+                   {
+                       return dataObject;
+                   }
+               }
+           }
+           return null;
+       }
+
+       #endregion helper methods
+    }
 }

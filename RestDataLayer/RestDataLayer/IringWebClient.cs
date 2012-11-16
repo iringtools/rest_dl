@@ -10,14 +10,16 @@ namespace Bechtel.DataLayer
         string MakeGetRequest(string url);
         void MakePutRequest(string url, string objectString);
         void MakePostRequest(string url, string objectString);
+<<<<<<< HEAD
 //void MakePostRequest(string url, string objectString);
 
+=======
+        void MakeDeleteRequest(string url);
+>>>>>>> Add, update and delete operations added
     }
 
     internal class IringWebClient : IWebClient
     {
-        //private HttpClient client = null;
-
         org.iringtools.utility.WebHttpClient client = null ;
 
         public IringWebClient()
@@ -26,7 +28,6 @@ namespace Bechtel.DataLayer
         }
 
         public IringWebClient(string baseUrl)
-            : this()
         {
             client = new org.iringtools.utility.WebHttpClient(baseUrl);
         }
@@ -47,14 +48,21 @@ namespace Bechtel.DataLayer
             return response;
         }
 
-        public void MakePutRequest(string url, string objectString)
+        public void MakePutRequest(string url, string jsonString)
+        {
+
+          
+        }
+
+        public void MakePostRequest(string url, string jsonString)
         {
           
         }
 
-        public void MakePostRequest(string url, string objectString)
+
+        public void MakeDeleteRequest(string url)
         {
-          
+           
         }
     }
 }

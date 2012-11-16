@@ -12,7 +12,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Data;
 using log4net;
-using WebClient = System.Net.Http;
+//using WebClient = System.Net.Http;
 
 
 namespace Bechtel.DataLayer
@@ -331,12 +331,67 @@ namespace Bechtel.DataLayer
 
         public override Response Delete(string objectType, DataFilter filter)
         {
-            throw new NotImplementedException();
+            try
+            {
+                IList<string> identifiers = GetIdentifiers(objectType, filter);
+                Response response = Delete(objectType, identifiers);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.ErrorFormat("Error while deleting a list of data objects of type [{0}]: {1}", objectType, ex);
+                throw new Exception("Error while deleting a list of data objects of type [" + objectType + "].", ex);
+            }
         }
 
         public override Response Delete(string objectType, IList<string> identifiers)
         {
-            throw new NotImplementedException();
+            Response response = new Response();
+
+            if (identifiers == null || identifiers.Count == 0)
+            {
+                Status status = new Status();
+                status.Level = StatusLevel.Warning;
+                status.Messages.Add("Nothing to delete.");
+                response.Append(status);
+                return response;
+            }
+
+            try
+            {
+                foreach (string identifier in identifiers)
+                {
+                    Status status = new Status();
+                    status.Identifier = identifier;
+                    string message = String.Empty;
+                    try
+                    {
+                        if (String.IsNullOrWhiteSpace(identifier))
+                            throw new ApplicationException("Identifier can not be blank or null.");
+
+                        string url = GenerateUrl(objectType, new List<string>() { identifier });
+                        _webClient.MakeDeleteRequest(url);
+
+                        message = String.Format("DataObject [{0}] deleted successfully.", identifier);
+                        status.Messages.Add(message);
+                        response.Append(status);
+                    }
+                    catch
+                    {
+                        message = String.Format("Error while deleting dataObject [{0}].", identifier);
+                        status.Messages.Add(message);
+                        response.Append(status);
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _logger.ErrorFormat("Error while deleting a list of data objects of type [{0}]: {1}", objectType, ex);
+                throw new Exception("Error while deleting a list of data objects of type [" + objectType + "].", ex);
+            }
+
+            return response;
         }
 
         #region Private function

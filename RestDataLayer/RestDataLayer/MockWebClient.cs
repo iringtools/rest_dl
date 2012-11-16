@@ -27,14 +27,20 @@ namespace Bechtel.DataLayer
         }
 
 
-        public void MakePutRequest(string url, string objectString)
+        public void MakePutRequest(string url, string jsonString)
         {
             //
         }
 
-        public void MakePostRequest(string url, string objectString)
+        public void MakePostRequest(string url, string jsonString)
         {
             //
+        }
+
+
+        public void MakeDeleteRequest(string url)
+        {
+            throw new NotImplementedException();
         }
     }
 }

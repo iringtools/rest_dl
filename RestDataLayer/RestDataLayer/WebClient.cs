@@ -34,18 +34,23 @@ namespace Bechtel.DataLayer
             return response;
         }
 
-        public void MakePutRequest(string url,string objectString)
+        public void MakePutRequest(string url,string jsonString)
         {
-           StringContent sc = new StringContent(objectString);
+            StringContent sc = new StringContent(jsonString);
            var rsponse = client.PutAsync(url, sc).Result.EnsureSuccessStatusCode();
            
         }
 
-        public void MakePostRequest(string url, string objectString)
+        public void MakePostRequest(string url, string jsonString)
         {
-            StringContent sc = new StringContent(objectString);
+            StringContent sc = new StringContent(jsonString);
             var rsponse = client.PostAsync(url, sc).Result.EnsureSuccessStatusCode();
             
+        }
+
+        public void MakeDeleteRequest(string url)
+        {
+            throw new NotImplementedException();
         }
     }
 }
