@@ -52,7 +52,7 @@ namespace Bechtel.DataLayer
             _objectyDictionary = LoadEndPointInDictionary();
 
             //_webClient = new IringWebClient(_baseUrl, _appKey, _authToken);
-            _webClient = new WebClient(_baseUrl, _appKey, _authToken);
+           _webClient = new WebClient(_baseUrl, _appKey, _authToken);
             //_webClient = new MockWebClient(_baseUrl, _appKey, _authToken);
 
         }
@@ -101,9 +101,6 @@ namespace Bechtel.DataLayer
                     dataObjects = ToDataObjects(dataTable, objectType);
                 }
 
-                
-
-                
                 return dataObjects;
             }
             catch (Exception ex)
@@ -216,6 +213,64 @@ namespace Bechtel.DataLayer
             return identifiers;
         }
 
+        public override IList<IDataObject> GetRelatedObjects(IDataObject dataObject, string relatedObjectType)
+        {
+            return GetRelatedObjects(dataObject, relatedObjectType, 0, 0);
+        }
+
+        public override long GetRelatedCount(IDataObject dataObject, string relatedObjectType)
+        {
+            return GetRelatedObjects(dataObject, relatedObjectType, 0, 0).Count;
+        }
+
+        public override IList<IDataObject> GetRelatedObjects(IDataObject dataObject, string relatedObjectType, int pageSize, int startIndex)
+        {
+            string objectType = dataObject.GetType().Name;
+
+            IList<IDataObject> dataObjects = null;
+
+            if (objectType == typeof(GenericDataObject).Name)
+            {
+                objectType = ((GenericDataObject)dataObject).ObjectType;
+            }
+
+            try
+            {
+                DataObject parentDataObject = _dataDictionary.dataObjects.Find(x => x.objectName.ToUpper() == objectType.ToUpper());
+
+                if (parentDataObject == null)
+                    throw new Exception("Parent data object [" + objectType + "] not found.");
+
+                DataObject relatedObjectDefinition = _dataDictionary.dataObjects.Find(x => x.objectName.ToUpper() == relatedObjectType.ToUpper());
+
+                if (relatedObjectDefinition == null)
+                    throw new Exception("Related data object [" + relatedObjectType + "] not found.");
+
+
+                DataRelationship dataRelationship = parentDataObject.dataRelationships.Find(c => c.relatedObjectName.ToLower() == relatedObjectDefinition.objectName.ToLower());
+                if (dataRelationship == null)
+                    throw new Exception("Relationship between data object [" + objectType + "] and related data object [" + relatedObjectType + "] not found.");
+
+                string pID = Convert.ToString(dataObject.GetPropertyValue(parentDataObject.keyProperties[0].ToString()));
+
+                string url = GenerateReletedUrl(objectType, pID, relatedObjectType, pageSize, startIndex);
+
+
+                string jsonString = GetJsonResponseFrom(url);
+                DataTable dataTable = GetDataTableFrom(jsonString, objectType);
+                dataObjects = ToDataObjects(dataTable, objectType);
+
+            }
+            catch (Exception ex)
+            {
+                _logger.ErrorFormat("Error while geting related data objects", ex);
+                throw new Exception("Error while geting related data objects", ex);
+            }
+
+
+            return dataObjects;
+        }
+
         public override Response Post(IList<IDataObject> dataObjects)
         {
             Response response = new Response();
@@ -225,8 +280,6 @@ namespace Bechtel.DataLayer
              
             objectType = ((GenericDataObject)dataObjects.FirstOrDefault()).ObjectType;
             DataObject objDef = _dataDictionary.dataObjects.Find(p => p.objectName.ToUpper() == objectType.ToUpper());
-            
-
 
             if (dataObjects == null || dataObjects.Count == 0)
             {
@@ -664,6 +717,29 @@ namespace Bechtel.DataLayer
         private string GenerateUrl(string objectType)
         {
             return GetObjectUrl(objectType);
+        }
+
+        private string GenerateReletedUrl(string parentObject, string pId, string relatedObject)
+        {
+            string url = GetObjectUrl(parentObject);
+            url = url + "//" + pId + "//" + relatedObject;
+            return url;
+        }
+
+        private string GenerateReletedUrl(string parentObject, string pId, string relatedObject, int limit, int start)
+        {
+            string url = GenerateReletedUrl(parentObject, pId, relatedObject);
+
+            if (limit == 0)
+            {
+                url = url + @"?start=" + Convert.ToString(0) + @"&limit=" + Convert.ToString(10000000);
+            }
+            else
+            {
+                url = url + @"?start=" + Convert.ToString(start) + @"&limit=" + Convert.ToString(limit);
+            }
+
+            return url;
         }
         
 
