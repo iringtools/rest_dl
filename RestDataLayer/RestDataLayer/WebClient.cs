@@ -8,49 +8,53 @@ namespace Bechtel.DataLayer
 {
     internal class WebClient : IWebClient
     {
-        private HttpClient client = null;
+        private HttpClient _client = null;
 
         public WebClient()
         {
-            client = new HttpClient();                
+            _client = new HttpClient();                
         }
         
         public WebClient(string baseUrl):this()
         {
-            client.BaseAddress = new Uri(baseUrl);
+            _client.BaseAddress = new Uri(baseUrl);
             // Add an Accept header for JSON format.
-            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            _client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
         }
 
         public WebClient(string baseUrl,string appKey, string accessToken):this(baseUrl)
         {
-            client.DefaultRequestHeaders.Add("Authorization", accessToken);
-            client.DefaultRequestHeaders.Add("X-myPSN-AppKey", appKey);
+            _client.DefaultRequestHeaders.Add("Authorization", accessToken);
+            _client.DefaultRequestHeaders.Add("X-myPSN-AppKey", appKey);
         }
 
         public string MakeGetRequest(string url)
         {
-            string response = client.GetStringAsync(url).Result;
+           
+            string response = _client.GetStringAsync(url).Result;
             return response;
         }
 
         public void MakePutRequest(string url,string jsonString)
         {
             StringContent sc = new StringContent(jsonString);
-           var rsponse = client.PutAsync(url, sc).Result.EnsureSuccessStatusCode();
+           var rsponse = _client.PutAsync(url, sc).Result.EnsureSuccessStatusCode();
            
         }
 
         public void MakePostRequest(string url, string jsonString)
         {
             StringContent sc = new StringContent(jsonString);
-            var rsponse = client.PostAsync(url, sc).Result.EnsureSuccessStatusCode();
+            var rsponse = _client.PostAsync(url, sc).Result.EnsureSuccessStatusCode();
             
         }
 
         public void MakeDeleteRequest(string url)
         {
-            throw new NotImplementedException();
+            _client.DeleteAsync(url).Result.EnsureSuccessStatusCode();
+            
         }
+
+        
     }
 }

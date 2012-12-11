@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 namespace Bechtel.DataLayer
 {
@@ -16,23 +17,23 @@ namespace Bechtel.DataLayer
 
     internal class IringWebClient : IWebClient
     {
-        org.iringtools.utility.WebHttpClient client = null ;
+        org.iringtools.utility.WebHttpClient _client = null ;
 
         public IringWebClient()
         {
-            client = new org.iringtools.utility.WebHttpClient("");
+            _client = new org.iringtools.utility.WebHttpClient("");
         }
 
         public IringWebClient(string baseUrl)
         {
-            client = new org.iringtools.utility.WebHttpClient(baseUrl);
+            _client = new org.iringtools.utility.WebHttpClient(baseUrl);
         }
 
         public IringWebClient(string baseUrl, string appKey, string accessToken)
             : this(baseUrl)
         {
-            client.AppKey = appKey;
-            client.AccessToken = accessToken;
+            _client.AppKey = appKey;
+            _client.AccessToken = accessToken;
             
             //client.ContentType = @"application/json";
             
@@ -40,25 +41,33 @@ namespace Bechtel.DataLayer
 
         public string MakeGetRequest(string url)
         {
-            string response = client.GetMessage(url);
+            string response = _client.GetMessage(url);
             return response;
         }
 
         public void MakePutRequest(string url, string jsonString)
         {
 
-          
+            byte[] byteArray = Encoding.UTF8.GetBytes(jsonString);
+            using (MemoryStream stream = new MemoryStream(byteArray)) 
+            {
+                _client.PutStream(url, stream);
+            }
         }
 
         public void MakePostRequest(string url, string jsonString)
         {
-          
+            byte[] byteArray = Encoding.UTF8.GetBytes(jsonString);
+            using (MemoryStream stream = new MemoryStream(byteArray))
+            {
+                _client.PostStream(url, stream);
+            }
         }
 
 
         public void MakeDeleteRequest(string url)
         {
-           
+            throw new NotImplementedException();
         }
     }
 }

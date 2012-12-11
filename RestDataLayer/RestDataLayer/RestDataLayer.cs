@@ -51,8 +51,8 @@ namespace Bechtel.DataLayer
             _keyDelimiter = Convert.ToString(_settings["DefaultKeyDelimiter"]) ?? string.Empty;
             _objectyDictionary = LoadEndPointInDictionary();
 
-            //_webClient = new IringWebClient(_baseUrl, _appKey, _authToken);
-           _webClient = new WebClient(_baseUrl, _appKey, _authToken);
+            _webClient = new IringWebClient(_baseUrl, _appKey, _authToken);
+         //  _webClient = new WebClient(_baseUrl, _appKey, _authToken);
             //_webClient = new MockWebClient(_baseUrl, _appKey, _authToken);
 
         }

@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!--This file represents the results of running a test suite-->
+<test-results name="C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer.Test\RestDataLayer.Test.csproj" total="8" errors="0" failures="2" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2012-12-11" time="11:39:00">
+  <environment nunit-version="2.5.8.10295" clr-version="4.0.30319.296" os-version="Microsoft Windows NT 6.1.7601 Service Pack 1" platform="Win32NT" cwd="C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\NUnit.Runner\bin\Debug" machine-name="NDHD203655" user="bkumar2" user-domain="IEAMS" />
+  <culture-info current-culture="en-US" current-uiculture="en-US" />
+  <test-suite type="Project" name="C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer.Test\RestDataLayer.Test.csproj" executed="True" result="Failure" success="False" time="85.236" asserts="0">
+    <results>
+      <test-suite type="Assembly" name="C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer.Test\bin\Debug\RestDataLayer.Test.dll" executed="True" result="Failure" success="False" time="85.233" asserts="0">
+        <results>
+          <test-suite type="Namespace" name="RestDataLayer" executed="True" result="Failure" success="False" time="85.230" asserts="0">
+            <results>
+              <test-suite type="Namespace" name="Test" executed="True" result="Failure" success="False" time="85.228" asserts="0">
+                <results>
+                  <test-suite type="TestFixture" name="Tests" executed="True" result="Failure" success="False" time="85.227" asserts="0">
+                    <results>
+                      <test-case name="RestDataLayer.Test.Tests.Test_Dictionary_Creation" executed="True" result="Success" success="True" time="0.013" asserts="1" />
+                      <test-case name="RestDataLayer.Test.Tests.Test_Get_With_Filter" executed="True" result="Failure" success="False" time="66.876" asserts="1">
+                        <failure>
+                          <message><![CDATA[  Expected: 4
+  But was:  1
+]]></message>
+                          <stack-trace><![CDATA[at RestDataLayer.Test.Tests.Test_Get_With_Filter() in C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer.Test\Test.cs:line 116
+]]></stack-trace>
+                        </failure>
+                      </test-case>
+                      <test-case name="RestDataLayer.Test.Tests.Test_GetCount" executed="True" result="Success" success="True" time="7.376" asserts="1" />
+                      <test-case name="RestDataLayer.Test.Tests.Test_GetDataTable" executed="True" result="Failure" success="False" time="4.637" asserts="1">
+                        <failure>
+                          <message><![CDATA[  Expected: 4
+  But was:  1
+]]></message>
+                          <stack-trace><![CDATA[at RestDataLayer.Test.Tests.Test_GetDataTable() in C:\Users\bkumar2\Documents\GitHub\rest_dl\RestDataLayer\RestDataLayer.Test\Test.cs:line 94
+]]></stack-trace>
+                        </failure>
+                      </test-case>
+                      <test-case name="RestDataLayer.Test.Tests.TestCreate" executed="True" result="Success" success="True" time="0.033" asserts="1" />
+                      <test-case name="RestDataLayer.Test.Tests.TestGetWithIdentifiers" executed="True" result="Success" success="True" time="1.380" asserts="1" />
+                      <test-case name="RestDataLayer.Test.Tests.TestPostWithAddAndDeleteByIdentifier" executed="True" result="Success" success="True" time="3.642" asserts="2" />
+                      <test-case name="RestDataLayer.Test.Tests.TestPostWithUpdate" executed="True" result="Success" success="True" time="0.050" asserts="1" />
+                    </results>
+                  </test-suite>
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>

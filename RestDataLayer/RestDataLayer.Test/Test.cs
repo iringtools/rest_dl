@@ -53,7 +53,7 @@ namespace RestDataLayer.Test
            AppSettingsReader twSettings = new AppSettingsReader(twConfigFile);
            adapterSettings.AppendSettings(twSettings);
 
-           _dataLayer = new Bechtel.DataLayer.RestDataLayer(adapterSettings);
+           _dataLayer = new Bechtel.DataLayer.RestDataLayer2(adapterSettings);
 
            _filter = Utility.Read<DataFilter>(adapterSettings["FilterPath"]);
            
