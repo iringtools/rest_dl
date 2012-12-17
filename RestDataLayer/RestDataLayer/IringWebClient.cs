@@ -34,8 +34,7 @@ namespace Bechtel.DataLayer
         {
             _client.AppKey = appKey;
             _client.AccessToken = accessToken;
-            
-            //client.ContentType = @"application/json";
+            _client.ContentType = @"application/json";
             
         }
 

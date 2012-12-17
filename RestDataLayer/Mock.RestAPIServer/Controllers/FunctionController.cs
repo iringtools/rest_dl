@@ -13,19 +13,41 @@ namespace Mock.RestAPIServer.Controllers
         // GET api/function
         public GenericObject<Function> Get()
         {
-            GenericObject<Function> obj = new GenericObject<Function>() { total=4,limit=4,Items = Utility.GetFunctions()};
-            return obj;
+            var items = Utility.GetFunctions();
+            return new GenericObject<Function>() { Items = items, limit = items.Count, total = items.Count };
+            
         }
 
-       
+        public GenericObject<Function> Get(int id)
+        {
+            return this.Get(id,null,0,0);
+
+        }
+
+        // GET api/project/5
+        public GenericObject<Function> Get(int id,string name,int limit,int start)
+        {
+            var items = Utility.GetFunctions().Where<Function>(x => x.Id == id);
+
+            if (name != null)
+                items = items.Where<Function>(x => x.Name == name);
+
+            if (limit !=0 )
+                items = items.Skip(start).Take(limit);
+
+            var itemList = items.ToList();
+
+            return new GenericObject<Function>() { Items = itemList, limit = itemList.Count, total = itemList.Count };
+
+        }
 
         // POST api/function
-        public void Post([FromBody]string value)
+        public void Post(Function value)
         {
         }
 
         // PUT api/function/5
-        public void Put(int id, [FromBody]string value)
+        public void Put(Function value)
         {
         }
 

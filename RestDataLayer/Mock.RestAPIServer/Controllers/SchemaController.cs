@@ -20,13 +20,13 @@ namespace Mock.RestAPIServer.Controllers
 
             if (resource.ToUpper() == "FUNCTION")
             {
-                schema.Add("links", new Links() { key = new List<string>() { "Id" }, self = string.Format("Schema/{0}", resource), relation = new List<object>() });
+                schema.Add("links", new Links() { key = new List<string>() { "Id" }, self = "/api/Function/{Id}", relation = new List<object>() });
                 schema.Add("Id", new ObjectDefination() { type = "number", size = "0" });
                 schema.Add("Name", new ObjectDefination() { type = "string", size = "255" });
             }
             else if (resource.ToUpper() == "PROJECT")
             {
-                schema.Add("links", new Links() { key = new List<string>() { "Id","Name" }, self = string.Format("Schema/{0}", resource), relation = new List<object>() });
+                schema.Add("links", new Links() { key = new List<string>() { "Id", "Name" }, self = "/api/Project/{Id}_{Name}", relation = new List<object>() });
                 schema.Add("Id", new ObjectDefination() { type = "number", size = "0" });
                 schema.Add("Name", new ObjectDefination() { type = "string", size = "25" });
                 schema.Add("Description", new ObjectDefination() { type = "string", size = "255" });

@@ -13,24 +13,24 @@ namespace Mock.RestAPIServer.Controllers
         // GET api/project
         public GenericObject<Project> Get()
         {
-            GenericObject<Project> obj = new GenericObject<Project>() { total = 4, limit = 4, Items = Utility.GetProjects() };
-            return obj;
-
+            var items = Utility.GetProjects();
+            return new GenericObject<Project>() { Items = items, limit = items.Count, total = items.Count };
         }
 
         // GET api/project/5
-        public string Get(int id)
+        public GenericObject<Project> Get(int id)
         {
-            return "value";
+            var items = Utility.GetProjects().Where<Project>(x => x.Id == id).ToList();
+            return new GenericObject<Project>() { Items = items, limit = items.Count, total = items.Count };
         }
 
         // POST api/project
-        public void Post([FromBody]string value)
+        public void Post(Project value)
         {
         }
 
         // PUT api/project/5
-        public void Put(int id, [FromBody]string value)
+        public void Put(Project value)
         {
         }
 

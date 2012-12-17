@@ -70,7 +70,7 @@ namespace Mock.RestAPIServer.Models
             IList<Function> list = new List<Function>();
             list.Add(new Function() { Id = 1, Name = "function1" });
             list.Add(new Function() { Id = 2, Name = "function2" });
-            list.Add(new Function() { Id = 3, Name = "function3" });
+            list.Add(new Function() { Id = 3, Name = "GENERAL MANAGEMENT" });
             list.Add(new Function() { Id = 4, Name = "function4" });
 
             return list;

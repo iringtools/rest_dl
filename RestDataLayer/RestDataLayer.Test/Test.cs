@@ -87,8 +87,7 @@ namespace RestDataLayer.Test
        {
          DataDictionary dictionary = _dataLayer.GetDictionary();
          IList<string> identifiers = new List<string>();
-         identifiers.Add("1");
-
+         identifiers.Add("3");
          IList<IDataObject> dataObject = _dataLayer.Get(_objectType, identifiers);
          
            Assert.AreEqual(dataObject.Count, 1);

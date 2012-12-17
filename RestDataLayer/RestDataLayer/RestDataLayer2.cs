@@ -33,13 +33,14 @@ namespace Bechtel.DataLayer
         string _endPointUrl = string.Empty;
         string _baseUrl = string.Empty;
         string _schemaUrl = string.Empty;
-
+        
         IWebClient _webClient = null;
 
         private ILog _logger = LogManager.GetLogger(typeof(RestDataLayer2));
 
 
         private Dictionary<string, string> _objectyDictionary = null;
+        private IDictionary<string, string> _selfUrl = null;
 
         public RestDataLayer2(AdapterSettings settings)
             : base(settings)
@@ -54,11 +55,14 @@ namespace Bechtel.DataLayer
             _baseUrl = _settings["BaseUrl"];
             _keyDelimiter = Convert.ToString(_settings["DefaultKeyDelimiter"]) ?? string.Empty;
 
-            _webClient = new WebClient(_baseUrl, _appKey, _authToken);
-            // _webClient = new IringWebClient(_baseUrl, _appKey, _authToken);
+            //_webClient = new WebClient(_baseUrl, _appKey, _authToken);
+             _webClient = new IringWebClient(_baseUrl, _appKey, _authToken);
             //_webClient = new MockWebClient(_baseUrl, _appKey, _authToken);
-            
+
+           
              LoadEndPointSettings();
+             _selfUrl = GetSelfUrlList(); 
+            
         }
 
         public override DataDictionary GetDictionary()
@@ -156,9 +160,25 @@ namespace Bechtel.DataLayer
         {
             try
             {
-                string url = GenerateUrl(objectType, identifiers);
-                string jsonString = GetJsonResponseFrom(url);
-                DataTable datatable = GetDataTableFrom(jsonString, objectType);
+                DataTable datatable = datatable = new DataTable();
+                foreach (string identifier in identifiers)
+                {
+                    string url = GenerateUrl(objectType, identifier);
+                    string jsonString = GetJsonResponseFrom(url);
+                    DataTable dt = GetDataTableFrom(jsonString, objectType);
+                    datatable.Merge(dt);
+                }
+
+                // Remove duplicate data from dataTable
+                DataView dView = new DataView(datatable);
+                string[] arrColumns = new string[datatable.Columns.Count];
+                
+                for(int i=0;i<datatable.Columns.Count;i++)
+                    arrColumns[i]=datatable.Columns[i].ColumnName;
+                
+                datatable = dView.ToTable(true, arrColumns);
+                //------
+
                 IList<IDataObject> dataObjects = ToDataObjects(datatable, objectType);
                 return dataObjects;
             }
@@ -250,19 +270,27 @@ namespace Bechtel.DataLayer
                 if (relatedObjectDefinition == null)
                     throw new Exception("Related data object [" + relatedObjectType + "] not found.");
 
-
                 DataRelationship dataRelationship = parentDataObject.dataRelationships.Find(c => c.relatedObjectName.ToLower() == relatedObjectDefinition.objectName.ToLower());
                 if (dataRelationship == null)
                     throw new Exception("Relationship between data object [" + objectType + "] and related data object [" + relatedObjectType + "] not found.");
 
-                string pID = Convert.ToString(dataObject.GetPropertyValue(parentDataObject.keyProperties[0].ToString()));
+                DataFilter filter = null;
+                foreach (PropertyMap propertyMap in dataRelationship.propertyMaps)
+                {
+                    filter = new DataFilter();
+                    string keyFieldValue = Convert.ToString(dataObject.GetPropertyValue(propertyMap.dataPropertyName));
 
-                string url = GenerateReletedUrl(objectType, pID, relatedObjectType, pageSize, startIndex);
+                    Expression expression = new Expression();
+                    expression.LogicalOperator = LogicalOperator.And;
+                    expression.RelationalOperator = RelationalOperator.EqualTo;
 
+                    expression.PropertyName = propertyMap.relatedPropertyName;
+                    expression.Values = new Values() { keyFieldValue };
 
-                string jsonString = GetJsonResponseFrom(url);
-                DataTable dataTable = GetDataTableFrom(jsonString, objectType);
-                dataObjects = ToDataObjects(dataTable, objectType);
+                    filter.Expressions.Add(expression);
+                }
+
+                dataObjects = Get(relatedObjectType, filter, 0, 0);
 
             }
             catch (Exception ex)
@@ -289,7 +317,7 @@ namespace Bechtel.DataLayer
             {
                 Status status = new Status();
                 status.Level = StatusLevel.Warning;
-                status.Messages.Add("Data object list provided was empty.");
+                status.Messages.Add("Data object list provided is empty.");
                 response.Append(status);
                 return response;
             }
@@ -425,7 +453,7 @@ namespace Bechtel.DataLayer
                         if (String.IsNullOrWhiteSpace(identifier))
                             throw new ApplicationException("Identifier can not be blank or null.");
 
-                        string url = GenerateUrl(objectType, new List<string>() { identifier });
+                        string url = GenerateUrl(objectType, identifier);
                         _webClient.MakeDeleteRequest(url);
 
                         message = String.Format("DataObject [{0}] deleted successfully.", identifier);
@@ -450,11 +478,7 @@ namespace Bechtel.DataLayer
             return response;
         }
 
-        #region 2
-                
-
-        #endregion
-
+     
         #region Private function
 
         /// <summary>
@@ -487,69 +511,7 @@ namespace Bechtel.DataLayer
 
         }
 
-        /// <summary>
-        /// It will Parse json string and then fill a list with their properties
-        /// </summary>
-        //private void FillDataPropertiesFrom(string jsonString, List<DataProp> dataPrpCollection, string objectName)
-        //{
-
-        //    List<DataProp> dataPrpCollectionTemp = new List<DataProp>();
-
-        //    JObject o = JObject.Parse(jsonString);
-        //    JArray items = (JArray)o["Items"];
-        //    JObject item = (JObject)items[0];
-        //    bool isKeyAssigned = false;
-
-        //    foreach (var jp in item.Properties())
-        //    {
-        //        DataProp dp = new DataProp();
-        //        dp.Object_Name = objectName;
-        //        dp.columnName = jp.Name;
-        //        dp.propertyName = jp.Name;
-        //        dp.keyType = "unassigned";
-        //        dp.isNullable = "false";
-
-        //        if (dp.columnName.ToUpper() == "ID" && isKeyAssigned == false)
-        //        {
-        //            isKeyAssigned = true;
-        //            dp.isKey = true;
-
-        //        }
-
-        //        dp.dataType = ResolveDataType(jp.Value.Type);
-        //        dp.dataLength = GetDefaultSize(jp.Value.Type).ToString();
-        //        dataPrpCollectionTemp.Add(dp);
-        //    }
-
-
-        //    if (isKeyAssigned == false)
-        //    {
-        //        foreach (var dp in dataPrpCollectionTemp)
-        //        {
-        //            if (dp.columnName.ToUpper().EndsWith("_ID"))
-        //            {
-        //                isKeyAssigned = true;
-        //                dp.isKey = true;
-
-        //            }
-
-        //        }
-        //    }
-
-        //    if (isKeyAssigned == false)
-        //    {
-        //        isKeyAssigned = true;
-        //        dataPrpCollectionTemp[0].isKey = true;
-        //    }
-
-
-        //    foreach (var dp in dataPrpCollectionTemp)
-        //    {
-        //        dataPrpCollection.Add(dp);
-        //    }
-
-        //}
-
+       
         private DataDictionary CreateDataDictionary()
         {
             try
@@ -559,8 +521,7 @@ namespace Bechtel.DataLayer
                 KeyProperty _keyproperties = new KeyProperty();
                 DataProperty _dataproperties = new DataProperty();
                 DataDictionary _dataDictionary = new DataDictionary();
-               // List<DataProp> dataPrpCollection = new List<DataProp>();
-
+              
                 foreach (var dic in _objectyDictionary)
                 {
                     string objectName = dic.Key;
@@ -613,6 +574,8 @@ namespace Bechtel.DataLayer
                     {
                         if (propery.Name == "links")
                         {
+                            _selfUrl.Add(objectName, schemaObject["links"]["self"].Value<string>());
+
                             JArray keyList = (JArray)schemaObject["links"]["key"];
                             for (int i = 0; i < keyList.Count; i++)
                             {
@@ -637,10 +600,38 @@ namespace Bechtel.DataLayer
                 _logger.Error("Error in loading data dictionary : " + ex);
                 throw ex;
             }
-            finally
+          
+        }
+
+        private IDictionary<string,string> GetSelfUrlList()
+        {
+            IDictionary<string, string> selfUrlList = new Dictionary<string, string>();
+            try
             {
-                //Disconnect();
+                foreach (var dic in _objectyDictionary)
+                {
+                    string objectName = dic.Key;
+                    string url = _schemaUrl.Replace("{resource}", dic.Key);
+                    string json = GetJsonResponseFrom(url);
+                    JObject schemaObject = JObject.Parse(json);
+
+                    foreach (JProperty propery in schemaObject.Properties())
+                    {
+                        if (propery.Name == "links")
+                        {
+                            selfUrlList.Add(objectName, schemaObject["links"]["self"].Value<string>());
+                        }
+                    }
+                }
             }
+            catch (Exception ex)
+            {
+                _logger.Error("Error in loading data dictionary : " + ex);
+                throw ex;
+            }
+
+            return selfUrlList;
+
         }
 
         /// <summary>
@@ -664,21 +655,19 @@ namespace Bechtel.DataLayer
         {
             try
             {
-                //org.iringtools.utility.WebHttpClient client = new org.iringtools.utility.WebHttpClient(_baseUrl);
-                //client.AppKey = _appKey;
-                //client.AccessToken = _authToken;
-                //string aaa = client.GetMessage(url);
                 return _webClient.MakeGetRequest(url);
             }
             catch (Exception ex)
             {
-                throw new ApplicationException("Error in connectiong rest server");
+                throw ex;
             }
         }
 
         private DataTable GetDataTableFrom(string jsonString, string objectType, string collectionName = "Items")
         {
-            if (jsonString.IndexOf("{\"status_text\":\"Record Not Found.\",\"status_code\":\"202\"}") >= 0)
+           // if (jsonString.IndexOf("{\"status_text\":\"Record Not Found.\",\"status_code\":\"202\"}") >= 0)
+            if (jsonString.IndexOf("{\"total\":0,\"limit\":0,\"Items\":[]}") >= 0)
+            
             {
                 return GetDataTableSchema(objectType);
             }
@@ -724,17 +713,24 @@ namespace Bechtel.DataLayer
             return url;
         }
 
-        private string GenerateUrl(string objectType, IList<string> identifiers)
+        private string GenerateUrl(string objectType, string identifier)
         {
-            string url = GetObjectUrl(objectType);
+            //string url = GetObjectUrl(objectType);
 
-            if (identifiers != null)
+            string url = (from dicEntry in _selfUrl
+                       where dicEntry.Key.ToUpper() == objectType.ToUpper()
+                       select dicEntry.Value).SingleOrDefault<string>();
+
+            DataObject objDef = _dataDictionary.dataObjects.Find(p => p.objectName.ToUpper() == objectType.ToUpper());
+            
+            string[] identifierArray = identifier.Split(_keyDelimiter.ToCharArray());
+
+            if (identifierArray.Count() != objDef.keyProperties.Count)
+                throw new Exception("key fields are not matching with their values.");
+
+            for(int i=0;i<objDef.keyProperties.Count;i++)
             {
-                foreach (string id in identifiers)
-                {
-                    url = url + @"/" + id;
-                    break;
-                }
+               url=  url.Replace("{" + objDef.keyProperties[i].keyPropertyName + "}", identifierArray[i]);
             }
 
             return url;
@@ -768,7 +764,6 @@ namespace Bechtel.DataLayer
             return url;
         }
 
-
         private long GetObjectCount(string objectType, DataFilter filter)
         {
             string url = GetObjectUrl(objectType);
@@ -791,7 +786,6 @@ namespace Bechtel.DataLayer
 
         }
 
-
         private DataType ResolveDataType(string type)
         {
             switch (type)
@@ -805,84 +799,6 @@ namespace Bechtel.DataLayer
                     return DataType.String;
             }
 
-        }
-
-        private DataType ResolveDataType(JTokenType type)
-        {
-            switch (type)
-            {
-                case JTokenType.Integer:
-                    return DataType.Int32;
-                case JTokenType.Date:
-                    return DataType.DateTime;
-                case JTokenType.String:
-                    return DataType.String;
-                case JTokenType.Float:
-                    return DataType.Double;
-                case JTokenType.Boolean:
-                    return DataType.Boolean;
-                case JTokenType.Bytes:
-                    return DataType.Byte;
-                default:
-                    return DataType.String;
-            }
-
-        }
-
-        //private int GetDefaultSize(JTokenType type)
-        //{
-        //    switch (type)
-        //    {
-        //        case JTokenType.Integer:
-        //            return 16;
-        //        case JTokenType.Date:
-        //            return 50;
-        //        case JTokenType.String:
-        //            return 128;
-        //        case JTokenType.Float:
-        //            return 32;
-        //        case JTokenType.Boolean:
-        //            return 1;
-        //        default:
-        //            return 128;
-        //    }
-
-        //}
-
-        private System.Type ResolveDataType(DataType dataType)
-        {
-
-
-            switch (dataType)
-            {
-                case DataType.Boolean:
-                    return typeof(bool);
-                case DataType.Byte:
-                    return typeof(bool);
-                case DataType.Char:
-                    return typeof(bool);
-                case DataType.DateTime:
-                    return typeof(bool);
-                case DataType.Decimal:
-                    return typeof(bool);
-                case DataType.Double:
-                    return typeof(bool);
-                case DataType.Int16:
-                    return typeof(bool);
-                case DataType.Int32:
-                    return typeof(bool);
-                case DataType.Int64:
-                    return typeof(bool);
-                case DataType.Reference:
-                    return typeof(bool);
-                case DataType.String:
-                    return typeof(bool);
-                case DataType.Single:
-                    return typeof(bool);
-
-
-            }
-            return typeof(string);
         }
 
         private IList<IDataObject> ToDataObjects(DataTable dataTable, string objectType)
